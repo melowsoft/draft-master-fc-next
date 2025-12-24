@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4 text-zinc-600 text-xs font-medium">
-          <p>© 2024 DRAFTMASTER FC UK. DEVELOPED FOR THE BEAUTIFUL GAME.</p>
+          <p>© 2025 DRAFTMASTER FC UK. DEVELOPED FOR THE BEAUTIFUL GAME.</p>
         </div>
       </div>
     </footer>
