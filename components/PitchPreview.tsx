@@ -437,10 +437,7 @@ const PitchPreview: React.FC = () => {
       }
       
       // Show success message
-      setTimeout(() => {
-        alert(`Pitch image downloaded successfully as ${filename.toUpperCase()}!\n\nWatermark: draftmasterfc.com`);
-      }, 500);
-      
+    
     } catch (error) {
       console.error('Error downloading pitch:', error);
       
