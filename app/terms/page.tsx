@@ -1,5 +1,12 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { ChevronLeft, ScrollText, ShieldCheck } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description: 'Terms of service for DraftMaster FC.',
+  alternates: { canonical: '/terms' },
+};
 
 export default function Page() {
   return (

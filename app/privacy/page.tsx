@@ -1,5 +1,12 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { ChevronLeft, Fingerprint, ShieldCheck } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'Privacy policy for DraftMaster FC.',
+  alternates: { canonical: '/privacy' },
+};
 
 export default function Page() {
   return (
