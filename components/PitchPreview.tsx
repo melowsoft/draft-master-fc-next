@@ -75,6 +75,7 @@ const PitchPreview: React.FC = () => {
 
   const [selectedFormation, setSelectedFormation] = useState<string>('4-4-2');
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
+  const [isDraggingPlayer, setIsDraggingPlayer] = useState(false);
 
   const pitchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
@@ -110,13 +111,18 @@ const PitchPreview: React.FC = () => {
     setSelectedFormation(formationId);
   }, [players, formations]);
 
-  // Handle player movement
-  const handlePointerDown = (id: string) => {
+  // Handle player movement - IMPROVED FOR MOBILE
+  const handlePointerDown = (id: string, e: React.PointerEvent) => {
+    e.stopPropagation();
     setActivePlayerId(id);
+    setIsDraggingPlayer(true);
   };
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!activePlayerId || !pitchRef.current) return;
+    if (!activePlayerId || !pitchRef.current || !isDraggingPlayer) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
     const rect = pitchRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -128,11 +134,59 @@ const PitchPreview: React.FC = () => {
         y: Math.max(5, Math.min(95, y)) 
       } : p
     ));
-  }, [activePlayerId]);
+  }, [activePlayerId, isDraggingPlayer]);
 
-  const handlePointerUp = () => {
+  const handlePointerUp = useCallback(() => {
     setActivePlayerId(null);
-  };
+    setIsDraggingPlayer(false);
+  }, []);
+
+  // Handle touch events specifically for mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent, id: string) => {
+    e.stopPropagation();
+    setActivePlayerId(id);
+    setIsDraggingPlayer(true);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!activePlayerId || !pitchRef.current || !isDraggingPlayer) return;
+    
+    e.preventDefault(); // Prevent scrolling when dragging player
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const rect = pitchRef.current.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+    
+    setPlayers(prev => prev.map(p => 
+      p.id === activePlayerId ? { 
+        ...p, 
+        x: Math.max(5, Math.min(95, x)), 
+        y: Math.max(5, Math.min(95, y)) 
+      } : p
+    ));
+  }, [activePlayerId, isDraggingPlayer]);
+
+  const handleTouchEnd = useCallback(() => {
+    setActivePlayerId(null);
+    setIsDraggingPlayer(false);
+  }, []);
+
+  // Clean up event listeners on unmount
+  useEffect(() => {
+    const handleGlobalPointerUp = () => {
+      setActivePlayerId(null);
+      setIsDraggingPlayer(false);
+    };
+
+    document.addEventListener('pointerup', handleGlobalPointerUp);
+    document.addEventListener('touchend', handleGlobalPointerUp);
+    
+    return () => {
+      document.removeEventListener('pointerup', handleGlobalPointerUp);
+      document.removeEventListener('touchend', handleGlobalPointerUp);
+    };
+  }, []);
 
   // Toggle global display settings
   const toggleGlobalNames = () => {
@@ -198,6 +252,7 @@ const PitchPreview: React.FC = () => {
       {/* Goal Box - 6-yard box */}
       <div className={`absolute ${position === 'top' ? 'top-16 md:top-24' : 'bottom-16 md:bottom-24'} left-1/2 -translate-x-1/2 w-[40%] h-10 md:h-16 border-2 border-white/50 ${position === 'top' ? 'border-t-0 rounded-b-lg' : 'border-b-0 rounded-t-lg'}`}>
         {/* Box lines */}
+        <div className={`absolute ${position === 'top' ? 'top-0' : 'bottom-0'} left-1/2 -translate-x-1/2 w-1 h-3 md:h-4 bg-white/50`}></div>
       </div>
       
       {/* Penalty Spot */}
@@ -460,7 +515,7 @@ const PitchPreview: React.FC = () => {
     }
   };
 
-  // Render player component for the interactive view
+  // Render player component for the interactive view - FIXED TOUCH HANDLING
   const renderPlayer = (p: Player) => {
     const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
     const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
@@ -468,10 +523,17 @@ const PitchPreview: React.FC = () => {
     return (
       <div 
         key={p.id}
-        onPointerDown={() => handlePointerDown(p.id)}
+        onPointerDown={(e) => handlePointerDown(p.id, e)}
+        onTouchStart={(e) => handleTouchStart(e, p.id)}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center select-none group
           ${activePlayerId === p.id ? 'z-50 cursor-grabbing' : 'z-10 cursor-grab'}`}
-        style={{ left: `${p.x}%`, top: `${p.y}%` }}
+        style={{ 
+          left: `${p.x}%`, 
+          top: `${p.y}%`,
+          touchAction: 'none' // Prevent scrolling when touching/dragging player
+        }}
       >
         <div className="relative mb-0.5 md:mb-1">
           {/* Jersey Circle */}
@@ -762,13 +824,13 @@ const PitchPreview: React.FC = () => {
               </div>
             )}
 
-            {/* Interactive Pitch with Realistic Goals */}
+            {/* Interactive Pitch with Realistic Goals - ALLOWS SCROLLING */}
             <div 
               ref={pitchRef}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerLeave={handlePointerUp}
-              className={`relative aspect-[3/4] ${pitchThemes[pitchTheme]} overflow-hidden touch-none rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg md:shadow-xl lg:shadow-2xl border-4 md:border-6 lg:border-8 border-white/60`}
+              className={`relative aspect-[3/4] ${pitchThemes[pitchTheme]} overflow-hidden touch-auto rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg md:shadow-xl lg:shadow-2xl border-4 md:border-6 lg:border-8 border-white/60`}
             >
               {/* Grid Overlay */}
               {showGrid && (
