@@ -676,24 +676,87 @@ const PitchPreview: React.FC = () => {
       <div className="w-full max-w-6xl mx-auto bg-gradient-to-br from-white to-zinc-50 rounded-2xl md:rounded-[40px] shadow-xl md:shadow-2xl overflow-hidden text-black border border-zinc-200">
         {/* Mobile Header Controls */}
         {isMobile && (
-          <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-zinc-100">
-            <button 
-              onClick={() => setShowSidePanel(true)}
-              className="p-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-full transition-colors"
-              title="Open Settings"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            
-            <div className="text-center">
-              <h2 className="text-lg font-black text-zinc-900 truncate max-w-[200px] mx-auto">{teamName}</h2>
-              <p className="text-xs text-zinc-500 truncate">{managerName}</p>
+          <div className="lg:hidden flex flex-col items-center justify-center p-4 bg-white border-b border-zinc-100">
+            <div className="text-center mb-4">
+              {/* Team Name - Mobile Editable */}
+              {isEditingTeamName ? (
+                <div className="relative mb-2">
+                  <input
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    onBlur={() => setIsEditingTeamName(false)}
+                    onKeyDown={(e) => e.key === 'Enter' && setIsEditingTeamName(false)}
+                    className="text-xl font-black text-center bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-700 pb-1 w-full"
+                    autoFocus
+                    maxLength={40}
+                  />
+                  <PenTool className="absolute -right-6 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-600 animate-pulse" />
+                </div>
+              ) : (
+                <h2 
+                  onClick={() => setIsEditingTeamName(true)}
+                  className="text-xl font-black mb-2 tracking-tight text-zinc-900 hover:text-blue-700 cursor-pointer transition-colors group relative inline-block"
+                >
+                  {teamName}
+                  <Edit2 className="absolute -right-5 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </h2>
+              )}
+
+              {/* Manager Name - Mobile Editable */}
+              <div className="flex items-center justify-center gap-2">
+                <User className="w-3 h-3 text-zinc-400" />
+                {isEditingManagerName ? (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={managerName}
+                      onChange={(e) => setManagerName(e.target.value)}
+                      onBlur={() => setIsEditingManagerName(false)}
+                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingManagerName(false)}
+                      className="text-sm text-center bg-transparent border-b border-blue-400 focus:outline-none focus:border-blue-600 pb-0.5 w-32"
+                      autoFocus
+                      maxLength={30}
+                    />
+                    <PenTool className="absolute -right-5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-blue-500 animate-pulse" />
+                  </div>
+                ) : (
+                  <p 
+                    onClick={() => setIsEditingManagerName(true)}
+                    className="text-zinc-600 text-sm font-medium hover:text-blue-600 cursor-pointer transition-colors group relative"
+                  >
+                    {managerName}
+                    <Edit3 className="absolute -right-5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </p>
+                )}
+              </div>
             </div>
             
-            <div className="p-2">
-            
+            <div className="flex items-center justify-between w-full">
+              <button 
+                onClick={() => setShowSidePanel(true)}
+                className="p-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-full transition-colors"
+                title="Open Settings"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              
+              <button 
+                onClick={downloadPitchImage}
+                disabled={isDownloading}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-full hover:opacity-90 transition-opacity text-sm"
+              >
+                {isDownloading ? (
+                  <svg className="w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {isDownloading ? 'Processing...' : 'Download'}
+              </button>
             </div>
-           
           </div>
         )}
 
@@ -936,19 +999,18 @@ const PitchPreview: React.FC = () => {
                   Randomize
                 </button>
                 <button 
-                  onClick={downloadPitchImage}
-                  disabled={isDownloading}
-                  className="flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity text-sm"
+                  onClick={() => {
+                    if (players.length >= 2) {
+                      const i1 = Math.floor(Math.random() * players.length);
+                      let i2 = Math.floor(Math.random() * players.length);
+                      while (i2 === i1) i2 = Math.floor(Math.random() * players.length);
+                      swapPlayers(players[i1].id, players[i2].id);
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity text-sm"
                 >
-                  {isDownloading ? (
-                    <svg className="w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
-                  Download
+                  <Palette className="w-4 h-4" />
+                  Swap Players
                 </button>
               </div>
             )}
