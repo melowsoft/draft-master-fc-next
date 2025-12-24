@@ -264,7 +264,7 @@ const PitchPreview: React.FC = () => {
     </div>
   );
 
-  // Create a clean version of just the pitch for download
+  // Create a clean version of just the pitch for download WITH WATERMARK
   const createPitchOnlyElement = () => {
     const container = document.createElement('div');
     container.style.width = '1200px';
@@ -366,6 +366,14 @@ const PitchPreview: React.FC = () => {
             <span>MID</span>
             <span>ATT</span>
           </div>
+          
+          <!-- WATERMARK - Bottom Right Corner -->
+          <div style="position: absolute; bottom: 30px; right: 40px; z-index: 20; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border-radius: 12px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+            <svg width="20" height="20" fill="#3b82f6" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span style="color: #1f2937; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">draftmasterfc.com</span>
+          </div>
         </div>
       </div>
     `;
@@ -373,7 +381,7 @@ const PitchPreview: React.FC = () => {
     return container;
   };
 
-  // Improved download function using html-to-image - PITCH ONLY
+  // Improved download function using html-to-image - PITCH ONLY WITH WATERMARK
   const downloadPitchImage = async (format: 'png' | 'jpeg' = 'png') => {
     if (isDownloading || !downloadPitchRef.current) return;
     
@@ -430,7 +438,7 @@ const PitchPreview: React.FC = () => {
       
       // Show success message
       setTimeout(() => {
-        alert(`Pitch image downloaded successfully as ${filename.toUpperCase()}!`);
+        alert(`Pitch image downloaded successfully as ${filename.toUpperCase()}!\n\nWatermark: draftmasterfc.com`);
       }, 500);
       
     } catch (error) {
@@ -529,6 +537,16 @@ const PitchPreview: React.FC = () => {
                 box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
                 margin-bottom: 30px; 
               }
+              .watermark-notice {
+                background: #3b82f6;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                text-align: center;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+              }
               .instructions { 
                 background: white; 
                 padding: 25px; 
@@ -583,10 +601,34 @@ const PitchPreview: React.FC = () => {
                 text-decoration: none; 
                 display: inline-block; 
               }
+              .watermark-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: #f8fafc;
+                padding: 15px;
+                border-radius: 10px;
+                margin: 15px 0;
+                border: 2px solid #e2e8f0;
+              }
+              .check-icon {
+                width: 20px;
+                height: 20px;
+                background: #10b981;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+              }
             </style>
           </head>
           <body>
             <h1>Your Pitch Lineup</h1>
+            <div class="watermark-notice">
+              ✓ Includes draftmasterfc.com watermark
+            </div>
             <img src="${dataUrl}" alt="${teamName} Lineup" />
             <div class="instructions">
               <p><strong>To save this pitch image to your device:</strong></p>
@@ -601,6 +643,13 @@ const PitchPreview: React.FC = () => {
               <div class="step">
                 <div class="step-number">3</div>
                 <div>Choose where to save it on your device</div>
+              </div>
+              <div class="watermark-info">
+                <div class="check-icon">✓</div>
+                <div>
+                  <strong>Watermark Included</strong><br>
+                  <small>Bottom right corner: draftmasterfc.com</small>
+                </div>
               </div>
               <p style="margin-top: 20px; font-size: 14px; color: #6b7280;">
                 The image is high quality and ready for sharing!
@@ -629,8 +678,8 @@ const PitchPreview: React.FC = () => {
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: `${teamName} Lineup`,
-            text: `Check out my ${teamName} lineup!`,
+            title: `${teamName} Lineup - draftmasterfc.com`,
+            text: `Check out my ${teamName} lineup created with DraftMaster FC! #DraftMasterFC`,
           });
           return;
         }
@@ -640,7 +689,7 @@ const PitchPreview: React.FC = () => {
     }
     
     // Method 4: Last resort - show data URL in alert for manual save
-    alert(`To save your pitch image:\n\n1. Copy this link: ${dataUrl.substring(0, 100)}...\n2. Open it in a new tab\n3. Long press to save`);
+    alert(`To save your pitch image:\n\n1. Copy this link: ${dataUrl.substring(0, 100)}...\n2. Open it in a new tab\n3. Long press to save\n\n✓ Includes draftmasterfc.com watermark`);
   };
 
   // Share functionality for social media
@@ -666,13 +715,13 @@ const PitchPreview: React.FC = () => {
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: `${teamName} Football Lineup`,
-            text: `Check out my ${teamName} football lineup! ⚽ #FootballLineup`,
+            title: `${teamName} Football Lineup - draftmasterfc.com`,
+            text: `Check out my ${teamName} football lineup created with DraftMaster FC! ⚽ #FootballLineup #DraftMasterFC`,
           });
         } else {
           await navigator.share({
-            title: `${teamName} Football Lineup`,
-            text: `Check out my ${teamName} football lineup! ⚽ #FootballLineup`,
+            title: `${teamName} Football Lineup - draftmasterfc.com`,
+            text: `Check out my ${teamName} football lineup created with DraftMaster FC! ⚽ #FootballLineup #DraftMasterFC`,
             url: window.location.href,
           });
         }
@@ -860,8 +909,8 @@ const PitchPreview: React.FC = () => {
                 <Download className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h4 className="font-bold text-blue-900">Pitch Only</h4>
-                <p className="text-sm text-blue-700">Download just the pitch with players</p>
+                <h4 className="font-bold text-blue-900">Pitch Only with Watermark</h4>
+                <p className="text-sm text-blue-700">Includes draftmasterfc.com in bottom right</p>
               </div>
             </div>
           </div>
@@ -878,6 +927,21 @@ const PitchPreview: React.FC = () => {
                 <div className="font-bold text-emerald-900 mb-1">JPEG</div>
                 <div className="text-xs text-emerald-700">Optimized</div>
               </div>
+            </div>
+          </div>
+          
+          {/* Watermark Preview */}
+          <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg width="12" height="12" fill="#3b82f6" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-gray-700">Watermark Preview</span>
+            </div>
+            <div className="flex items-center gap-2 p-2 bg-white/80 rounded-lg border border-gray-300">
+              <span className="text-gray-900 font-bold">draftmasterfc.com</span>
             </div>
           </div>
         </div>
@@ -939,8 +1003,8 @@ const PitchPreview: React.FC = () => {
         <div className="mt-6 pt-6 border-t border-zinc-200">
           <p className="text-xs text-zinc-500 text-center">
             {isMobile 
-              ? 'Download includes only the pitch area with players'
-              : 'High-quality image of your pitch lineup'}
+              ? 'Download includes pitch area with draftmasterfc.com watermark'
+              : 'High-quality image with draftmasterfc.com watermark in bottom right'}
           </p>
         </div>
       </div>
@@ -1426,11 +1490,11 @@ const PitchPreview: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
-                    <span>High-quality PNG & JPEG formats</span>
+                    <span>Includes draftmasterfc.com watermark</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
-                    <span>Perfect for sharing on social media</span>
+                    <span>High-quality PNG & JPEG formats</span>
                   </li>
                 </ul>
               </div>
@@ -1457,7 +1521,7 @@ const PitchPreview: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1"></div>
-                  <span>Download includes only the pitch area</span>
+                  <span>Download includes watermark in bottom right</span>
                 </li>
               </ul>
             </div>
