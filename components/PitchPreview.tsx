@@ -31,8 +31,8 @@ interface Formation {
 
 const PitchPreview: React.FC = () => {
   // Team State
-  const [teamName, setTeamName] = useState('Stick to the plan FC');
-  const [managerName, setManagerName] = useState('Adil Mahmood');
+  const [teamName, setTeamName] = useState('Team Name Here');
+  const [managerName, setManagerName] = useState('Manager Name Here');
   const [isEditingTeamName, setIsEditingTeamName] = useState(false);
   const [isEditingManagerName, setIsEditingManagerName] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -198,7 +198,6 @@ const PitchPreview: React.FC = () => {
       {/* Goal Box - 6-yard box */}
       <div className={`absolute ${position === 'top' ? 'top-16 md:top-24' : 'bottom-16 md:bottom-24'} left-1/2 -translate-x-1/2 w-[40%] h-10 md:h-16 border-2 border-white/50 ${position === 'top' ? 'border-t-0 rounded-b-lg' : 'border-b-0 rounded-t-lg'}`}>
         {/* Box lines */}
-        <div className={`absolute ${position === 'top' ? 'top-0' : 'bottom-0'} left-1/2 -translate-x-1/2 w-1 h-3 md:h-4 bg-white/50`}></div>
       </div>
       
       {/* Penalty Spot */}
@@ -209,257 +208,257 @@ const PitchPreview: React.FC = () => {
     </div>
   );
 
-  // Download pitch as image - Updated to match current pitch design
-const downloadPitchImage = async () => {
-  if (!downloadRef.current || isDownloading) return;
-  
-  setIsDownloading(true);
-  
-  try {
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '1200px'; // Optimized for mobile view
-    container.style.height = '1600px'; // Taller for mobile aspect
-    container.style.background = 'white';
-    container.style.padding = '30px';
-    document.body.appendChild(container);
+  // Download pitch as image
+  const downloadPitchImage = async () => {
+    if (!downloadRef.current || isDownloading) return;
     
-    const cleanPitchHTML = `
-      <div style="width: 100%; height: 100%; display: flex; flex-direction: column; gap: 30px; background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        <!-- Team Header - Mobile Optimized -->
-        <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
-          <h1 style="font-size: 36px; font-weight: 900; color: #111827; margin: 0 0 12px 0; letter-spacing: -0.5px; line-height: 1.2;">${teamName}</h1>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <svg width="20" height="20" fill="#6b7280" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-            <p style="font-size: 22px; color: #4b5563; margin: 0; font-weight: 500; line-height: 1.3;">${managerName}</p>
-          </div>
-        </div>
-        
-        <!-- Formation Info - Above pitch on mobile -->
-        <div style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #f8fafc, #f1f5f9); padding: 15px 20px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-              <svg width="16" height="16" fill="#3b82f6" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-4v2h4v2h-4v2h4v2H9v-2h4v-2H9V9h4V7H9V5h6v4z"/>
+    setIsDownloading(true);
+    
+    try {
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '1200px';
+      container.style.height = '1600px';
+      container.style.background = 'white';
+      container.style.padding = '30px';
+      document.body.appendChild(container);
+      
+      const cleanPitchHTML = `
+        <div style="width: 100%; height: 100%; display: flex; flex-direction: column; gap: 30px; background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <!-- Team Header - Mobile Optimized -->
+          <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+            <h1 style="font-size: 36px; font-weight: 900; color: #111827; margin: 0 0 12px 0; letter-spacing: -0.5px; line-height: 1.2;">${teamName}</h1>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="20" height="20" fill="#6b7280" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
-            </div>
-            <div>
-              <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">FORMATION</div>
-              <div style="font-size: 24px; color: #1e293b; font-weight: 900; letter-spacing: 0.5px;">${selectedFormation}</div>
+              <p style="font-size: 22px; color: #4b5563; margin: 0; font-weight: 500; line-height: 1.3;">${managerName}</p>
             </div>
           </div>
           
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${pitchTheme === 'green' ? '#a7d9b9' : pitchTheme === 'blue' ? '#93c5fd' : pitchTheme === 'classic' ? '#d4d4d4' : '#1f2937'}; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"></div>
-            <div style="font-size: 14px; color: #475569; font-weight: 600;">${pitchTheme.charAt(0).toUpperCase() + pitchTheme.slice(1)}</div>
+          <!-- Formation Info - Above pitch on mobile -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #f8fafc, #f1f5f9); padding: 15px 20px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                <svg width="16" height="16" fill="#3b82f6" viewBox="0 0 24 24">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-4v2h4v2h-4v2h4v2H9v-2h4v-2H9V9h4V7H9V5h6v4z"/>
+                </svg>
+              </div>
+              <div>
+                <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">FORMATION</div>
+                <div style="font-size: 24px; color: #1e293b; font-weight: 900; letter-spacing: 0.5px;">${selectedFormation}</div>
+              </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 12px; height: 12px; border-radius: 50%; background: ${pitchTheme === 'green' ? '#a7d9b9' : pitchTheme === 'blue' ? '#93c5fd' : pitchTheme === 'classic' ? '#d4d4d4' : '#1f2937'}; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"></div>
+              <div style="font-size: 14px; color: #475569; font-weight: 600;">${pitchTheme.charAt(0).toUpperCase() + pitchTheme.slice(1)}</div>
+            </div>
           </div>
-        </div>
-        
-        <!-- Pitch Container -->
-        <div style="flex: 1; position: relative; display: flex; flex-direction: column;">
-          <!-- Main Pitch - Mobile Optimized -->
-          <div style="flex: 1; min-height: 0; position: relative; border-radius: 20px; overflow: hidden; background: linear-gradient(to bottom, ${pitchTheme === 'green' ? '#a7d9b9' : pitchTheme === 'blue' ? '#93c5fd' : pitchTheme === 'classic' ? '#d4d4d4' : '#1f2937'}, ${pitchTheme === 'green' ? '#8bc9a6' : pitchTheme === 'blue' ? '#60a5fa' : pitchTheme === 'classic' ? '#a3a3a3' : '#111827'});">
-            <!-- Pitch Outline -->
-            <div style="position: absolute; inset: 25px; border: 3px solid rgba(255,255,255,0.6); border-radius: 16px;"></div>
-            
-            <!-- Center Line -->
-            <div style="position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(255,255,255,0.6);"></div>
-            
-            <!-- Center Circle -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.6);"></div>
-            
-            <!-- Center Spot -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2);"></div>
-            
-            <!-- TOP Goal Area -->
-            <div style="position: absolute; top: 25px; left: 50%; transform: translateX(-50%); width: 85%; height: 80px;">
-            
-              <!-- Penalty Area -->
-              <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 70%; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-top: none; border-radius: 0 0 18px 18px;"></div>
+          
+          <!-- Pitch Container -->
+          <div style="flex: 1; position: relative; display: flex; flex-direction: column;">
+            <!-- Main Pitch - Mobile Optimized -->
+            <div style="flex: 1; min-height: 0; position: relative; border-radius: 20px; overflow: hidden; background: linear-gradient(to bottom, ${pitchTheme === 'green' ? '#a7d9b9' : pitchTheme === 'blue' ? '#93c5fd' : pitchTheme === 'classic' ? '#d4d4d4' : '#1f2937'}, ${pitchTheme === 'green' ? '#8bc9a6' : pitchTheme === 'blue' ? '#60a5fa' : pitchTheme === 'classic' ? '#a3a3a3' : '#111827'});">
+              <!-- Pitch Outline -->
+              <div style="position: absolute; inset: 25px; border: 3px solid rgba(255,255,255,0.6); border-radius: 16px;"></div>
               
-              <!-- Penalty Spot -->
-              <div style="position: absolute; top: 180px; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2);"></div>
+              <!-- Center Line -->
+              <div style="position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(255,255,255,0.6);"></div>
               
-              <!-- D-arc -->
-              <div style="position: absolute; top: 180px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-top: none; border-radius: 0 0 100px 100px;"></div>
-            </div>
-            
-            <!-- BOTTOM Goal Area -->
-            <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; height: 80px;">
-             
-              <!-- Penalty Area -->
-              <div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 70%; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-bottom: none; border-radius: 18px 18px 0 0;"></div>
+              <!-- Center Circle -->
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.6);"></div>
               
-              <!-- Penalty Spot -->
-              <div style="position: absolute; bottom: 180px; left: 50%; transform: translate(-50%, 50%); width: 8px; height: 8px; background: white; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2);"></div>
+              <!-- Center Spot -->
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2);"></div>
               
-              <!-- D-arc -->
-              <div style="position: absolute; bottom: 180px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-bottom: none; border-radius: 100px 100px 0 0;"></div>
-            </div>
-            
-            <!-- Players -->
-            ${players.map(p => {
-              const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
-              const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+              <!-- TOP Goal Area -->
+              <div style="position: absolute; top: 25px; left: 50%; transform: translateX(-50%); width: 85%; height: 80px;">
               
-              // Calculate position based on current pitch design
-              const playerX = p.x;
-              const playerY = p.y;
+                <!-- Penalty Area -->
+                <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 70%; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-top: none; border-radius: 0 0 18px 18px;"></div>
+                
+                <!-- Penalty Spot -->
+                <div style="position: absolute; top: 180px; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2);"></div>
+                
+                <!-- D-arc -->
+                <div style="position: absolute; top: 180px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-top: none; border-radius: 0 0 100px 100px;"></div>
+              </div>
               
-              return `
-                <div style="position: absolute; left: ${playerX}%; top: ${playerY}%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
-                  <!-- Jersey -->
-                  <div style="position: relative; margin-bottom: 4px;">
-                    <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 6px 15px rgba(0,0,0,0.15); border: 3px solid rgba(255,255,255,0.4);">
-                      <div style="flex: 1; background: ${p.colors[0]};"></div>
-                      <div style="flex: 1; background: ${p.colors[1]};"></div>
+              <!-- BOTTOM Goal Area -->
+              <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; height: 80px;">
+               
+                <!-- Penalty Area -->
+                <div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 70%; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-bottom: none; border-radius: 18px 18px 0 0;"></div>
+                
+                <!-- Penalty Spot -->
+                <div style="position: absolute; bottom: 180px; left: 50%; transform: translate(-50%, 50%); width: 8px; height: 8px; background: white; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2);"></div>
+                
+                <!-- D-arc -->
+                <div style="position: absolute; bottom: 180px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 2px solid rgba(255,255,255,0.6); border-bottom: none; border-radius: 100px 100px 0 0;"></div>
+              </div>
+              
+              <!-- Players -->
+              ${players.map(p => {
+                const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
+                const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+                
+                // Calculate position based on current pitch design
+                const playerX = p.x;
+                const playerY = p.y;
+                
+                return `
+                  <div style="position: absolute; left: ${playerX}%; top: ${playerY}%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
+                    <!-- Jersey -->
+                    <div style="position: relative; margin-bottom: 4px;">
+                      <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 6px 15px rgba(0,0,0,0.15); border: 3px solid rgba(255,255,255,0.4);">
+                        <div style="flex: 1; background: ${p.colors[0]};"></div>
+                        <div style="flex: 1; background: ${p.colors[1]};"></div>
+                      </div>
+                      <!-- Position -->
+                      <div style="position: absolute; bottom: -5px; right: -5px; width: 20px; height: 20px; background: rgba(255,255,255,0.95); color: black; font-size: 9px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #d1d5db; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        ${p.position}
+                      </div>
+                      <!-- Captain/Vice Badge -->
+                      ${p.role ? `
+                        <div style="position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
+                          <span style="color: white; font-size: 11px; font-weight: 900;">${p.role}</span>
+                        </div>
+                      ` : ''}
                     </div>
-                    <!-- Position -->
-                    <div style="position: absolute; bottom: -5px; right: -5px; width: 20px; height: 20px; background: rgba(255,255,255,0.95); color: black; font-size: 9px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #d1d5db; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                      ${p.position}
-                    </div>
-                    <!-- Captain/Vice Badge -->
-                    ${p.role ? `
-                      <div style="position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
-                        <span style="color: white; font-size: 11px; font-weight: 900;">${p.role}</span>
+                    
+                    <!-- Name -->
+                    ${shouldShowName ? `
+                      <div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 6px; margin-bottom: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                        <span style="color: black; font-size: 12px; font-weight: 900; white-space: nowrap; letter-spacing: -0.1px;">${p.name}</span>
+                      </div>
+                    ` : ''}
+                    
+                    <!-- Club -->
+                    ${shouldShowClub ? `
+                      <div style="background: white; padding: 5px 12px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                        <span style="color: #4b5563; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">${p.club}</span>
                       </div>
                     ` : ''}
                   </div>
-                  
-                  <!-- Name -->
-                  ${shouldShowName ? `
-                    <div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 6px; margin-bottom: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                      <span style="color: black; font-size: 12px; font-weight: 900; white-space: nowrap; letter-spacing: -0.1px;">${p.name}</span>
-                    </div>
-                  ` : ''}
-                  
-                  <!-- Club -->
-                  ${shouldShowClub ? `
-                    <div style="background: white; padding: 5px 12px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
-                      <span style="color: #4b5563; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">${p.club}</span>
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }).join('')}
+                `;
+              }).join('')}
+              
+              <!-- Position Labels -->
+              <div style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 900; backdrop-filter: blur(4px); background: rgba(0,0,0,0.2); padding: 8px 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); z-index: 5;">
+                <span>DEF</span>
+                <span>MID</span>
+                <span>ATT</span>
+              </div>
+            </div>
             
-            <!-- Position Labels -->
-            <div style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 900; backdrop-filter: blur(4px); background: rgba(0,0,0,0.2); padding: 8px 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); z-index: 5;">
-              <span>DEF</span>
-              <span>MID</span>
-              <span>ATT</span>
+            <!-- Footer Info - Mobile Optimized -->
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+              <!-- Display Settings Summary -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="padding: 10px; background: ${globalShowNames ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; border: 1px solid ${globalShowNames ? '#dcfce7' : '#fee2e2'};">
+                  <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 4px;">PLAYER NAMES</div>
+                  <div style="font-size: 14px; color: ${globalShowNames ? '#166534' : '#dc2626'}; font-weight: 700;">
+                    ${globalShowNames ? 'VISIBLE' : 'HIDDEN'}
+                  </div>
+                </div>
+                <div style="padding: 10px; background: ${globalShowClubs ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; border: 1px solid ${globalShowClubs ? '#dcfce7' : '#fee2e2'};">
+                  <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 4px;">CLUB BADGES</div>
+                  <div style="font-size: 14px; color: ${globalShowClubs ? '#166534' : '#dc2626'}; font-weight: 700;">
+                    ${globalShowClubs ? 'VISIBLE' : 'HIDDEN'}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Watermark and Info -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                <!-- Watermark -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="14" height="14" fill="#4b5563" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span style="color: #4b5563; font-size: 14px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
+                </div>
+                
+                <!-- Date -->
+                <div style="text-align: right;">
+                  <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">CREATED</div>
+                  <div style="font-size: 13px; color: #475569; font-weight: 700;">
+                    ${new Date().toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
-          <!-- Footer Info - Mobile Optimized -->
-          <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-            <!-- Display Settings Summary -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <div style="padding: 10px; background: ${globalShowNames ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; border: 1px solid ${globalShowNames ? '#dcfce7' : '#fee2e2'};">
-                <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 4px;">PLAYER NAMES</div>
-                <div style="font-size: 14px; color: ${globalShowNames ? '#166534' : '#dc2626'}; font-weight: 700;">
-                  ${globalShowNames ? 'VISIBLE' : 'HIDDEN'}
-                </div>
-              </div>
-              <div style="padding: 10px; background: ${globalShowClubs ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; border: 1px solid ${globalShowClubs ? '#dcfce7' : '#fee2e2'};">
-                <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 4px;">CLUB BADGES</div>
-                <div style="font-size: 14px; color: ${globalShowClubs ? '#166534' : '#dc2626'}; font-weight: 700;">
-                  ${globalShowClubs ? 'VISIBLE' : 'HIDDEN'}
-                </div>
-              </div>
-            </div>
-            
-            <!-- Watermark and Info -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-              <!-- Watermark -->
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg width="14" height="14" fill="#4b5563" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          <!-- Footer Note -->
+          <div style="padding: 15px; background: linear-gradient(to right, #f8fafc, #f1f5f9); border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center;">
+                <svg width="12" height="12" fill="white" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
-                <span style="color: #4b5563; font-size: 14px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
               </div>
-              
-              <!-- Date -->
-              <div style="text-align: right;">
-                <div style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">CREATED</div>
-                <div style="font-size: 13px; color: #475569; font-weight: 700;">
-                  ${new Date().toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              </div>
+              <span style="font-size: 14px; font-weight: 700; color: #1e293b;">Lineup created with DraftMaster FC</span>
             </div>
+            <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;">
+              All player positions and formations are customizable. Share your lineup on social media with #DraftMasterFC
+            </p>
           </div>
         </div>
-        
-        <!-- Footer Note -->
-        <div style="padding: 15px; background: linear-gradient(to right, #f8fafc, #f1f5f9); border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center;">
-              <svg width="12" height="12" fill="white" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-              </svg>
-            </div>
-            <span style="font-size: 14px; font-weight: 700; color: #1e293b;">Lineup created with DraftMaster FC</span>
-          </div>
-          <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;">
-            All player positions and formations are customizable. Share your lineup on social media with #DraftMasterFC
-          </p>
-        </div>
-      </div>
-    `;
-    
-    container.innerHTML = cleanPitchHTML;
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const canvas = await html2canvas(container, {
-      scale: 3, // Higher scale for mobile clarity
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      logging: false,
-      allowTaint: true,
-      width: container.offsetWidth,
-      height: container.offsetHeight,
-      onclone: (clonedDoc) => {
-        const images = clonedDoc.querySelectorAll('img');
-        const promises = Array.from(images).map(img => {
-          if (img.complete) return Promise.resolve();
-          return new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
+      `;
+      
+      container.innerHTML = cleanPitchHTML;
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(container, {
+        scale: 3, // Higher scale for mobile clarity
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+        onclone: (clonedDoc) => {
+          const images = clonedDoc.querySelectorAll('img');
+          const promises = Array.from(images).map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+              img.onload = resolve;
+              img.onerror = resolve;
+            });
           });
-        });
-        return Promise.all(promises);
-      }
-    });
-    
-    const link = document.createElement('a');
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const filename = `draftmaster-fc-${sanitizedTeamName}-${timestamp}.png`;
-    
-    link.download = filename;
-    link.href = canvas.toDataURL('image/png', 1.0);
-    link.click();
-    
-    document.body.removeChild(container);
-    
-  } catch (error) {
-    console.error('Error downloading pitch:', error);
-    alert('Failed to download lineup. Please try again.');
-  } finally {
-    setIsDownloading(false);
-  }
-};
+          return Promise.all(promises);
+        }
+      });
+      
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const filename = `draftmaster-fc-${sanitizedTeamName}-${timestamp}.png`;
+      
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+      
+      document.body.removeChild(container);
+      
+    } catch (error) {
+      console.error('Error downloading pitch:', error);
+      alert('Failed to download lineup. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // Render player component for the interactive view
   const renderPlayer = (p: Player) => {
@@ -629,9 +628,10 @@ const downloadPitchImage = async () => {
               <p className="text-xs text-zinc-500 truncate">{managerName}</p>
             </div>
             
-            <button className="p-2 text-zinc-400 hover:bg-zinc-50 rounded-full transition-colors">
-              <X className="w-5 h-5" />
-            </button>
+            <div className="p-2">
+            
+            </div>
+           
           </div>
         )}
 
@@ -733,6 +733,34 @@ const downloadPitchImage = async () => {
                 ))}
               </div>
             </div>
+
+            {/* Pitch Theme Selector - Mobile (below formations) */}
+            {isMobile && (
+              <div className="mb-4 md:mb-6">
+                <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl shadow-md">
+                  <div className="text-xs font-semibold text-zinc-600 mb-2 text-center">PITCH THEME</div>
+                  <div className="flex justify-center gap-3">
+                    {Object.entries(pitchThemes).map(([theme, _]) => (
+                      <button
+                        key={theme}
+                        onClick={() => setPitchTheme(theme as any)}
+                        className={`flex flex-col items-center gap-1 ${pitchTheme === theme ? 'text-blue-600' : 'text-zinc-500'}`}
+                      >
+                        <div 
+                          className={`w-10 h-10 rounded-full border-2 transition-all ${pitchTheme === theme ? 'border-blue-500 shadow-lg' : 'border-transparent hover:border-blue-300'}`}
+                          style={{ 
+                            background: theme === 'green' ? '#a7d9b9' : 
+                                       theme === 'blue' ? '#93c5fd' : 
+                                       theme === 'classic' ? '#d4d4d4' : '#1f2937' 
+                          }}
+                        />
+                        <span className="text-xs font-medium capitalize">{theme}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Interactive Pitch with Realistic Goals */}
             <div 
@@ -889,6 +917,11 @@ const downloadPitchImage = async () => {
 
             {/* Display Controls */}
             <div className="mb-6 md:mb-8">
+              {
+                isMobile &&  (<div className="flex justify-end"><button className="p-2 text-zinc-400 hover:bg-zinc-50 rounded-full transition-colors" onClick={() => setShowSidePanel(false)}>
+              <X className="w-5 h-5" />
+            </button></div>)
+              }
               <h3 className="text-lg md:text-xl font-black mb-4 md:mb-6 flex items-center gap-2 md:gap-3 text-zinc-900">
                 <Eye className="w-5 h-5 md:w-6 md:h-6" />
                 Display Settings
