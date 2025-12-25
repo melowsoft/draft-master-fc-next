@@ -5,7 +5,7 @@ import '../styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "DraftMaster FC | UK's #1 Football Squad Builder",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup builder UK",
     description:
       'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
     url: '/',
@@ -34,18 +34,17 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     type: 'website',
      images: [
-      {
-        url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "DraftMaster FC | UK's #1 Football Squad Builder",
-        type: "image/png",
-      },
-    ],
+  {
+    url: `${siteUrl}/opengraph-image.png`, // Absolute URL
+    width: 1200,
+    height: 630,
+    alt: "DraftMaster FC",
+  },
+],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "DraftMaster FC | UK's #1 Football Squad Builder",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup builder UK",
     description:
       'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
   },
