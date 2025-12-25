@@ -24,7 +24,7 @@ const Hero: React.FC = () => {
               className="w-2 h-2 rounded-full bg-green-500 mr-2" 
               aria-hidden="true"
             ></span>
-            <strong>UK'S #1 SQUAD ARCHITECT</strong> - JOIN 50K+ GAFFERS
+            <strong>UK'S #1 SQUAD BUILDER</strong> - JOIN 50K+ GAFFERS
           </div>
 
           {/* Main heading - Only one h1 per page */}
