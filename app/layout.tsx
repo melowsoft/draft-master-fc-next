@@ -16,11 +16,12 @@ export const metadata: Metadata = {
   description:
     'DraftMaster FC is the ultimate football drafting and formation builder platform where fans create lineups for premier leagues, champions leagues etc, compare players, build dream teams, and debate the greatest football squads of all time. Design tactical formations, draft legends and modern stars, analyze player stats, and share your teams with a global football community. Perfect for football fans, armchair managers, and fantasy football lovers worldwide.',
   keywords: [
-    'football squad builder',
+    'Create your team formations',
     'lineup maker uk',
-    'formation maker uk',
+    'Football Formation Creator',
     'premier league draft app',
     'lineup builder',
+    'Make Your Team and Share Tactics'
   ],
   alternates: {
     canonical: '/',
