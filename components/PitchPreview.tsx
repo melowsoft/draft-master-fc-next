@@ -7,7 +7,7 @@ import {
   CheckSquare, Square, Edit2, Edit3, Settings,
   PenTool, User, Camera, Goal, Menu, ChevronLeft
 } from 'lucide-react';
-import { toPng, toJpeg, toBlob } from 'html-to-image';
+import { toPng, toJpeg, toBlob, toSvg } from 'html-to-image';
 
 interface Player {
   id: string;
@@ -79,7 +79,7 @@ const PitchPreview: React.FC = () => {
   const [isDraggingPlayer, setIsDraggingPlayer] = useState(false);
 
   const pitchRef = useRef<HTMLDivElement>(null);
-  const downloadPitchRef = useRef<HTMLDivElement>(null);
+  const downloadRef = useRef<HTMLDivElement>(null);
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -264,300 +264,488 @@ const PitchPreview: React.FC = () => {
     </div>
   );
 
-  // Create a clean version of just the pitch for download WITH WATERMARK
-  const createPitchOnlyElement = () => {
-    const container = document.createElement('div');
-    container.style.width = '1200px';
-    container.style.height = '1600px';
-    container.style.background = 'white';
-    container.style.padding = '0';
-    container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    container.style.color = '#111827';
-    container.style.position = 'relative';
-    container.style.transform = 'none';
-    container.style.filter = 'none';
-    container.style.zoom = '1';
-
-    
-    const sanitizedTeamName = teamName || 'My Team';
-    const sanitizedManagerName = managerName || 'My Manager';
-    
-    container.innerHTML = `
-      <div style="width: 100%; height: 100%; display: flex; flex-direction: column; position: relative;">
-        <!-- Pitch Only - No headers, no side panels -->
-        <div style="flex: 1; position: relative; border-radius: 0; overflow: hidden; background: linear-gradient(to bottom, ${pitchTheme === 'green' ? '#10b981' : pitchTheme === 'blue' ? '#3b82f6' : pitchTheme === 'classic' ? '#9ca3af' : '#1f2937'}, ${pitchTheme === 'green' ? '#059669' : pitchTheme === 'blue' ? '#1d4ed8' : pitchTheme === 'classic' ? '#6b7280' : '#111827'});">
-          <!-- Pitch Outline -->
-          <div style="position: absolute; inset: 40px; border: 6px solid rgba(255,255,255,0.8); border-radius: 30px;"></div>
-          
-          <!-- Center Line -->
-          <div style="position: absolute; left: 0; right: 0; top: 50%; height: 3px; background: rgba(255,255,255,0.8);"></div>
-          
-          <!-- Center Circle -->
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.8);"></div>
-          
-          <!-- Center Spot -->
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid rgba(0,0,0,0.3); box-shadow: 0 4px 8px rgba(0,0,0,0.4);"></div>
-          
-          <!-- TOP Goal Area -->
-          <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 92%; height: 120px;">
-            <!-- Penalty Area -->
-            <div style="position: absolute; top: 120px; left: 50%; transform: translateX(-50%); width: 78%; height: 160px; border: 4px solid rgba(255,255,255,0.8); border-top: none; border-radius: 0 0 25px 25px;"></div>
-            
-            <!-- Penalty Spot -->
-            <div style="position: absolute; top: 280px; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid rgba(0,0,0,0.3); box-shadow: 0 4px 8px rgba(0,0,0,0.4);"></div>
-            
-            <!-- D-arc -->
-            <div style="position: absolute; top: 280px; left: 50%; transform: translateX(-50%); width: 320px; height: 160px; border: 4px solid rgba(255,255,255,0.8); border-top: none; border-radius: 0 0 160px 160px;"></div>
-          </div>
-          
-          <!-- BOTTOM Goal Area -->
-          <div style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 92%; height: 120px;">
-            <!-- Penalty Area -->
-            <div style="position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); width: 78%; height: 160px; border: 4px solid rgba(255,255,255,0.8); border-bottom: none; border-radius: 25px 25px 0 0;"></div>
-            
-            <!-- Penalty Spot -->
-            <div style="position: absolute; bottom: 280px; left: 50%; transform: translate(-50%, 50%); width: 16px; height: 16px; background: white; border-radius: 50%; border: 3px solid rgba(0,0,0,0.3); box-shadow: 0 4px 8px rgba(0,0,0,0.4);"></div>
-            
-            <!-- D-arc -->
-            <div style="position: absolute; bottom: 280px; left: 50%; transform: translateX(-50%); width: 320px; height: 160px; border: 4px solid rgba(255,255,255,0.8); border-bottom: none; border-radius: 160px 160px 0 0;"></div>
-          </div>
-          
-          <!-- Players -->
-          ${players.map(p => {
-            const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
-            const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
-            
-            return `
-              <div style="position: absolute; left: ${p.x}%; top: ${p.y}%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
-                <!-- Jersey -->
-                <div style="position: relative; margin-bottom: 12px;">
-                  <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 15px 35px rgba(0,0,0,0.25); border: 5px solid rgba(255,255,255,0.6);">
-                    <div style="flex: 1; background: ${p.colors[0]};"></div>
-                    <div style="flex: 1; background: ${p.colors[1]};"></div>
-                  </div>
-                  <!-- Position -->
-                  <div style="position: absolute; bottom: -10px; right: -10px; width: 35px; height: 35px; background: rgba(255,255,255,0.95); color: black; font-size: 14px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #d1d5db; box-shadow: 0 6px 15px rgba(0,0,0,0.2);">
-                    ${p.position}
-                  </div>
-                  <!-- Captain/Vice Badge -->
-                  ${p.role ? `
-                    <div style="position: absolute; top: -12px; right: -12px; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.25); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
-                      <span style="color: white; font-size: 18px; font-weight: 900;">${p.role}</span>
-                    </div>
-                  ` : ''}
-                </div>
-                
-                <!-- Name -->
-                ${shouldShowName ? `
-                  <div style="background: rgba(255,255,255,0.95); backdrop-filter: blur(6px); padding: 12px 20px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2);">
-                    <span style="color: black; font-size: 20px; font-weight: 900; white-space: nowrap; letter-spacing: -0.3px;">${p.name}</span>
-                  </div>
-                ` : ''}
-                
-                <!-- Club -->
-                ${shouldShowClub ? `
-                  <div style="background: white; padding: 10px 24px; border-radius: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); border: 3px solid #e5e7eb;">
-                    <span style="color: #4b5563; font-size: 16px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;">${p.club}</span>
-                  </div>
-                ` : ''}
+  // Create a clean version of ONLY the pitch area for download
+const createDownloadElement = () => {
+  const container = document.createElement('div');
+  
+  // Set 3:4 aspect ratio (portrait)
+  const width = 900; // 3x multiplier
+  const height = 1200; // 4x multiplier
+  
+  container.style.width = `${width}px`;
+  container.style.height = `${height}px`;
+  container.style.background = pitchTheme === 'green' ? 'linear-gradient(to bottom, #10b981, #059669)' : 
+                               pitchTheme === 'blue' ? 'linear-gradient(to bottom, #3b82f6, #1d4ed8)' : 
+                               pitchTheme === 'classic' ? 'linear-gradient(to bottom, #9ca3af, #6b7280)' : 
+                               'linear-gradient(to bottom, #1f2937, #111827)';
+  container.style.position = 'relative';
+  container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  container.style.color = '#111827';
+  container.style.overflow = 'hidden';
+  
+  const sanitizedTeamName = teamName || 'My Team';
+  const sanitizedManagerName = managerName || 'My Manager';
+  
+  container.innerHTML = `
+    <div style="width: 100%; height: 100%; position: relative;">
+      <!-- Pitch Outline -->
+      <div style="position: absolute; inset: 40px; border: 4px solid rgba(255,255,255,0.7); border-radius: 24px;"></div>
+      
+      <!-- Center Line -->
+      <div style="position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(255,255,255,0.7);"></div>
+      
+      <!-- Center Circle -->
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7);"></div>
+      
+      <!-- Center Spot -->
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+      
+      <!-- TOP Goal Area -->
+      <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 85%; height: 90px;">
+        <!-- Penalty Area -->
+        <div style="position: absolute; top: 90px; left: 50%; transform: translateX(-50%); width: 70%; height: 110px; border: 3px solid rgba(255,255,255,0.7); border-top: none; border-radius: 0 0 20px 20px;"></div>
+        
+        <!-- Penalty Spot -->
+        <div style="position: absolute; top: 200px; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+        
+        <!-- D-arc -->
+        <div style="position: absolute; top: 200px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 3px solid rgba(255,255,255,0.7); border-top: none; border-radius: 0 0 100px 100px;"></div>
+      </div>
+      
+      <!-- BOTTOM Goal Area -->
+      <div style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; height: 90px;">
+        <!-- Penalty Area -->
+        <div style="position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); width: 70%; height: 110px; border: 3px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 20px 20px 0 0;"></div>
+        
+        <!-- Penalty Spot -->
+        <div style="position: absolute; bottom: 200px; left: 50%; transform: translate(-50%, 50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+        
+        <!-- D-arc -->
+        <div style="position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 3px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 100px 100px 0 0;"></div>
+      </div>
+      
+      <!-- Players -->
+      ${players.map(p => {
+        const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
+        const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+        
+        // Scale positions from percentage to pixels
+        const playerX = (p.x / 100) * width;
+        const playerY = (p.y / 100) * height;
+        
+        return `
+          <div style="position: absolute; left: ${playerX}px; top: ${playerY}px; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
+            <!-- Jersey -->
+            <div style="position: relative; margin-bottom: 8px;">
+              <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid rgba(255,255,255,0.5);">
+                <div style="flex: 1; background: ${p.colors[0]};"></div>
+                <div style="flex: 1; background: ${p.colors[1]};"></div>
               </div>
-            `;
-          }).join('')}
-          
-          <!-- Position Labels -->
-          <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 80px; color: rgba(255,255,255,0.95); font-size: 22px; font-weight: 900; backdrop-filter: blur(6px); background: rgba(0,0,0,0.4); padding: 16px 60px; border-radius: 40px; border: 3px solid rgba(255,255,255,0.4); z-index: 5; letter-spacing: 2px;">
-            <span>DEF</span>
-            <span>MID</span>
-            <span>ATT</span>
+              <!-- Position -->
+              <div style="position: absolute; bottom: -8px; right: -8px; width: 24px; height: 24px; background: rgba(255,255,255,0.95); color: black; font-size: 11px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
+                ${p.position}
+              </div>
+              <!-- Captain/Vice Badge -->
+              ${p.role ? `
+                <div style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 6px 12px rgba(0,0,0,0.2); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
+                  <span style="color: white; font-size: 12px; font-weight: 900;">${p.role}</span>
+                </div>
+              ` : ''}
+            </div>
+            
+            <!-- Name -->
+            ${shouldShowName ? `
+              <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <span style="color: black; font-size: 14px; font-weight: 900; white-space: nowrap; letter-spacing: -0.2px;">${p.name}</span>
+              </div>
+            ` : ''}
+            
+            <!-- Club -->
+            ${shouldShowClub ? `
+              <div style="background: white; padding: 6px 15px; border-radius: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); border: 2px solid #e5e7eb;">
+                <span style="color: #4b5563; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;">${p.club}</span>
+              </div>
+            ` : ''}
           </div>
-          
-          <!-- WATERMARK - Bottom Right Corner -->
-          <div style="position: absolute; bottom: 30px; right: 40px; z-index: 20; display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border-radius: 12px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
-            <svg width="20" height="20" fill="#3b82f6" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        `;
+      }).join('')}
+      
+      <!-- Team Name Overlay (Top Center) -->
+      <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;">
+        <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.4);">
+          <h2 style="color: #111827; font-size: 24px; font-weight: 900; margin: 0 0 4px 0; text-align: center; white-space: nowrap;">
+            ${sanitizedTeamName}
+          </h2>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg width="16" height="16" fill="#6b7280" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
-            <span style="color: #1f2937; font-size: 18px; font-weight: 900; letter-spacing: 0.5px;">draftmasterfc.com</span>
+            <span style="color: #6b7280; font-size: 16px; font-weight: 600;">${sanitizedManagerName}</span>
           </div>
         </div>
       </div>
-    `;
-    
-    return container;
-  };
-
-const getExportPixelRatio = () =>
-  Math.min(window.devicePixelRatio * 2, 4);
-
-/**
- * Ensures fonts + layout are fully ready before snapshot
- */
-const prepareForExport = async (container: HTMLElement) => {
-  await document.fonts.ready;
-
-  container.style.transform = 'none';
-  container.style.filter = 'none';
-  container.style.zoom = '1';
+      
+      <!-- Formation Overlay (Top Right) -->
+      <div style="position: absolute; top: 20px; right: 20px; z-index: 5;">
+        <div style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 10px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2);">
+          <div style="color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 700; margin-bottom: 2px; letter-spacing: 0.5px;">FORMATION</div>
+          <div style="color: white; font-size: 20px; font-weight: 900;">${selectedFormation}</div>
+        </div>
+      </div>
+      
+      <!-- Position Labels (Bottom Center) -->
+      <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; color: rgba(255,255,255,0.95); font-size: 16px; font-weight: 900; backdrop-filter: blur(4px); background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.3); z-index: 5; letter-spacing: 1px;">
+        <span>DEF</span>
+        <span>MID</span>
+        <span>ATT</span>
+      </div>
+      
+      <!-- Watermark (Bottom Right) -->
+      <div style="position: absolute; bottom: 20px; right: 20px; z-index: 5;">
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <svg width="14" height="14" fill="#4b5563" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span style="color: #4b5563; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
+        </div>
+      </div>
+      
+      <!-- Display Settings Indicator (Top Left) -->
+      <div style="position: absolute; top: 20px; left: 20px; z-index: 5; display: flex; flex-direction: column; gap: 6px;">
+        ${globalShowNames ? `
+          <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+            <span style="color: #111827; font-size: 11px; font-weight: 700;">Names ON</span>
+          </div>
+        ` : ''}
+        ${globalShowClubs ? `
+          <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+            <span style="color: #111827; font-size: 11px; font-weight: 700;">Clubs ON</span>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+  
+  return container;
 };
 
-/**
- * Main download function
- */
+// Improved download function using html-to-image
 const downloadPitchImage = async (format: 'png' | 'jpeg' = 'png') => {
-  if (isDownloading || !downloadPitchRef.current) return;
-
+  if (isDownloading) return;
+  
   setIsDownloading(true);
-
-  let container: HTMLElement | null = null;
-
+  
   try {
-    container = createPitchOnlyElement();
+    // Create a temporary container for the download
+    const container = createDownloadElement();
     document.body.appendChild(container);
-
-    await prepareForExport(container);
-
-    const pixelRatio = getExportPixelRatio();
-
-    const dataUrl =
-      format === 'png'
-        ? await toPng(container, {
-            backgroundColor: '#ffffff',
-            pixelRatio,
-            cacheBust: true,
-            skipFonts: false,
-          })
-        : await toJpeg(container, {
-            backgroundColor: '#ffffff',
-            pixelRatio: Math.max(pixelRatio, 3),
-            quality: 1,
-            cacheBust: true,
-            skipFonts: false,
-          });
-
+    
+    // Convert to image based on format
+    let dataUrl: string;
+    
+    if (format === 'png') {
+      dataUrl = await toPng(container, {
+        quality: 1.0,
+        backgroundColor: 'transparent',
+        pixelRatio: 3, // High DPI for mobile
+        skipFonts: true,
+        cacheBust: true,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+      });
+    } else {
+      dataUrl = await toJpeg(container, {
+        quality: 0.95,
+        backgroundColor: '#ffffff',
+        pixelRatio: 3,
+        skipFonts: true,
+        cacheBust: true,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+      });
+    }
+    
+    // Remove the temporary container
+    document.body.removeChild(container);
+    
+    // Create filename
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const sanitizedTeamName =
-      teamName
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '') || 'my-team';
-
+    const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
     const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
-
+    
+    // Different download methods for mobile vs desktop
     if (isMobile) {
+      // For mobile browsers, we'll try multiple methods
       await downloadForMobile(dataUrl, filename, format);
     } else {
+      // Standard download for desktop
       const link = document.createElement('a');
-      link.href = dataUrl;
       link.download = filename;
+      link.href = dataUrl;
       link.click();
     }
-
-    setTimeout(() => {
-      alert(
-        `Pitch image downloaded successfully!\n\n✓ High-resolution\n✓ Crisp text\n✓ draftmasterfc.com watermark`
-      );
-    }, 400);
+    
+    // Show success message
+    alert(`${teamName} lineup downloaded successfully!`);
+    
   } catch (error) {
-    console.error('Export failed:', error);
-    alert('Failed to export image. Please try again.');
-  } finally {
-    if (container) {
+    console.error('Error downloading pitch:', error);
+    
+    // Fallback method using blob
+    try {
+      const container = createDownloadElement();
+      document.body.appendChild(container);
+      
+      const blob = await toBlob(container, {
+        quality: 0.95,
+        backgroundColor: format === 'jpeg' ? '#ffffff' : 'transparent',
+        pixelRatio: 2,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+      });
+      
       document.body.removeChild(container);
+      
+      if (blob) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
+        const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
+        
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+    } catch (fallbackError) {
+      console.error('Fallback download also failed:', fallbackError);
+      alert('Failed to download lineup. Please try again or use the share option.');
     }
+  } finally {
     setIsDownloading(false);
     setShowDownloadOptions(false);
   }
 };
 
-
- const downloadForMobile = async (
-  dataUrl: string,
-  filename: string,
-  format: string
-) => {
+// Special handling for mobile downloads
+const downloadForMobile = async (dataUrl: string, filename: string, format: string) => {
+  // Method 1: Try standard download first
   try {
     const link = document.createElement('a');
-    link.href = dataUrl;
     link.download = filename;
-
+    link.href = dataUrl;
+    
+    // Trigger click on iOS
+    const clickEvent = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
+    link.dispatchEvent(clickEvent);
+    
+    // For iOS Safari, we need to add to DOM and click
     document.body.appendChild(link);
     link.click();
-
-    setTimeout(() => document.body.removeChild(link), 100);
+    document.body.removeChild(link);
+    
     return;
-  } catch {}
-
+  } catch (error) {
+    console.log('Standard download failed on mobile, trying alternative...');
+  }
+  
+  // Method 2: Open in new tab for browsers that support it
   try {
     const newWindow = window.open();
-    if (!newWindow) return;
-
-    newWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
+    if (newWindow) {
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
         <head>
           <title>${filename}</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <style>
+            body { 
+              margin: 0; 
+              padding: 20px; 
+              background: #f3f4f6; 
+              display: flex; 
+              flex-direction: column; 
+              align-items: center; 
+              justify-content: center; 
+              min-height: 100vh;
+              font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            }
+            .container { 
+              max-width: 100%; 
+              text-align: center; 
+            }
+            img { 
+              max-width: 100%; 
+              height: auto; 
+              border-radius: 12px; 
+              box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+              margin-bottom: 20px;
+            }
+            .instructions { 
+              background: white; 
+              padding: 20px; 
+              border-radius: 12px; 
+              margin: 20px 0; 
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+              max-width: 400px;
+            }
+            h1 { 
+              color: #111827; 
+              font-size: 20px; 
+              margin-bottom: 15px;
+            }
+            p { 
+              color: #4b5563; 
+              line-height: 1.6; 
+              font-size: 14px;
+              margin-bottom: 15px;
+            }
+            .step { 
+              display: flex; 
+              align-items: flex-start; 
+              gap: 12px; 
+              margin: 15px 0; 
+              text-align: left; 
+            }
+            .step-number { 
+              width: 28px; 
+              height: 28px; 
+              background: #3b82f6; 
+              color: white; 
+              border-radius: 50%; 
+              display: flex; 
+              align-items: center; 
+              justify-content: center; 
+              font-weight: bold; 
+              font-size: 14px;
+              flex-shrink: 0;
+            }
+            .button {
+              background: linear-gradient(to right, #3b82f6, #1d4ed8);
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              font-weight: 600;
+              font-size: 16px;
+              cursor: pointer;
+              margin-top: 10px;
+              display: inline-block;
+              text-decoration: none;
+            }
+          </style>
         </head>
-        <body style="margin:0;background:#f3f4f6;text-align:center">
-          <img 
-            src="${dataUrl}" 
-            style="max-width:100%;height:auto;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25)" 
-          />
-          <p style="padding:20px;font-family:-apple-system">
-            Long-press the image to save it.<br />
-            ✓ High-resolution PNG
-          </p>
+        <body>
+          <div class="container">
+            <h1>Your Lineup Image</h1>
+            <img src="${dataUrl}" alt="${teamName} Lineup" />
+            <div class="instructions">
+              <p><strong>To save this image:</strong></p>
+              <div class="step">
+                <div class="step-number">1</div>
+                <div>Long press (touch and hold) the image above</div>
+              </div>
+              <div class="step">
+                <div class="step-number">2</div>
+                <div>Select "Save Image" or "Download Image" from the menu</div>
+              </div>
+              <div class="step">
+                <div class="step-number">3</div>
+                <div>Choose where to save it on your device</div>
+              </div>
+              <p style="color: #6b7280; font-size: 13px; margin-top: 20px;">
+                The image is in 3:4 portrait format, perfect for sharing!
+              </p>
+            </div>
+            <a href="${dataUrl}" download="${filename}" class="button">
+              Try Direct Download
+            </a>
+          </div>
         </body>
-      </html>
-    `);
-    newWindow.document.close();
-  } catch {}
-};
-
-
-  // Share functionality for social media
-const shareLineup = async () => {
-  if (!navigator.share) {
-    alert('Sharing is available on mobile devices only.');
-    return;
-  }
-
-  let container: HTMLElement | null = null;
-
-  try {
-    container = createPitchOnlyElement();
-    document.body.appendChild(container);
-
-    await prepareForExport(container);
-
-    const dataUrl = await toPng(container, {
-      backgroundColor: '#ffffff',
-      pixelRatio: getExportPixelRatio(),
-      skipFonts: false,
-    });
-
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], 'pitch-lineup.png', {
-      type: 'image/png',
-    });
-
-    if (navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: `${teamName} Lineup`,
-        text: `My football lineup created with DraftMaster FC ⚽`,
-      });
+        </html>
+      `);
+      newWindow.document.close();
+      return;
     }
   } catch (error) {
-    console.error('Share failed:', error);
-    alert('Unable to share. Please download instead.');
-  } finally {
-    if (container) {
-      document.body.removeChild(container);
+    console.log('New window method failed');
+  }
+  
+  // Method 3: Use share API if available (iOS/Android)
+  if (navigator.share && navigator.canShare) {
+    try {
+      // Convert dataUrl to blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      
+      const file = new File([blob], filename, { type: format === 'png' ? 'image/png' : 'image/jpeg' });
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `${teamName} Lineup`,
+          text: `Check out my ${teamName} lineup created with DraftMaster FC!`,
+        });
+        return;
+      }
+    } catch (shareError) {
+      console.log('Share API not available or failed:', shareError);
     }
   }
+  
+  // Method 4: Last resort - show alert with instructions
+  alert(`To save your lineup:\n1. We opened the image in a new tab\n2. If not, long press the image above\n3. Select "Save Image"\n\nImage saved as: ${filename}`);
 };
 
+  // Share functionality for social media
+  const shareLineup = async () => {
+    if (navigator.share) {
+      try {
+        // Create a smaller version for sharing
+        const container = createDownloadElement();
+        document.body.appendChild(container);
+        
+        const dataUrl = await toPng(container, {
+          quality: 0.8,
+          backgroundColor: '#ffffff',
+          pixelRatio: 1,
+        });
+        
+        document.body.removeChild(container);
+        
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'lineup.png', { type: 'image/png' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `${teamName} Lineup`,
+            text: `Check out my ${teamName} lineup created with DraftMaster FC! #DraftMasterFC`,
+          });
+        } else {
+          // Fallback to copying link
+          await navigator.share({
+            title: `${teamName} Lineup`,
+            text: `Check out my ${teamName} lineup created with DraftMaster FC! #DraftMasterFC`,
+            url: window.location.href,
+          });
+        }
+      } catch (error) {
+        console.error('Error sharing:', error);
+        alert('Share failed. Please try downloading and sharing manually.');
+      }
+    } else {
+      // Fallback for desktop
+      alert('Share feature is available on mobile devices. Please use the download option.');
+    }
+  };
 
   // Render player component for the interactive view
   const renderPlayer = (p: Player) => {
@@ -718,7 +906,7 @@ const shareLineup = async () => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl md:text-2xl font-black text-zinc-900">Download Pitch</h3>
+          <h3 className="text-xl md:text-2xl font-black text-zinc-900">Download Options</h3>
           <button 
             onClick={() => setShowDownloadOptions(false)}
             className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-full transition-colors"
@@ -729,45 +917,13 @@ const shareLineup = async () => {
         
         <div className="space-y-4 mb-8">
           <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Download className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h4 className="font-bold text-blue-900">Pitch Only with Watermark</h4>
-                <p className="text-sm text-blue-700">Includes draftmasterfc.com in bottom right</p>
-              </div>
-            </div>
+            <h4 className="font-bold text-blue-900 mb-2">High Quality PNG</h4>
+            <p className="text-sm text-blue-700">Best for printing and sharing</p>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-              <div className="text-center">
-                <div className="font-bold text-blue-900 mb-1">PNG</div>
-                <div className="text-xs text-blue-700">High Quality</div>
-              </div>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-              <div className="text-center">
-                <div className="font-bold text-emerald-900 mb-1">JPEG</div>
-                <div className="text-xs text-emerald-700">Optimized</div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Watermark Preview */}
-          <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg width="12" height="12" fill="#3b82f6" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-              </div>
-              <span className="text-sm font-semibold text-gray-700">Watermark Preview</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-white/80 rounded-lg border border-gray-300">
-              <span className="text-gray-900 font-bold">draftmasterfc.com</span>
-            </div>
+          <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-100">
+            <h4 className="font-bold text-emerald-900 mb-2">Optimized JPEG</h4>
+            <p className="text-sm text-emerald-700">Smaller file size, good for mobile</p>
           </div>
         </div>
         
@@ -783,7 +939,7 @@ const shareLineup = async () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Processing PNG...</span>
+                <span>Processing...</span>
               </>
             ) : (
               <>
@@ -804,7 +960,7 @@ const shareLineup = async () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Processing JPEG...</span>
+                <span>Processing...</span>
               </>
             ) : (
               <>
@@ -820,7 +976,7 @@ const shareLineup = async () => {
               className="flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all"
             >
               <Share2 className="w-5 h-5" />
-              <span>Share Pitch</span>
+              <span>Share Lineup</span>
             </button>
           )}
         </div>
@@ -828,8 +984,8 @@ const shareLineup = async () => {
         <div className="mt-6 pt-6 border-t border-zinc-200">
           <p className="text-xs text-zinc-500 text-center">
             {isMobile 
-              ? 'Download includes pitch area with draftmasterfc.com watermark'
-              : 'High-quality image with draftmasterfc.com watermark in bottom right'}
+              ? 'On mobile: Long press the image to save, or use share for social media'
+              : 'Image will be downloaded to your default downloads folder'}
           </p>
         </div>
       </div>
@@ -921,7 +1077,7 @@ const shareLineup = async () => {
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                {isDownloading ? 'Processing...' : 'Download Pitch'}
+                {isDownloading ? 'Processing...' : 'Download'}
               </button>
             </div>
           </div>
@@ -1058,9 +1214,12 @@ const shareLineup = async () => {
               </div>
             )}
 
-            {/* Interactive Pitch with Realistic Goals - This is what gets downloaded */}
+            {/* Interactive Pitch with Realistic Goals */}
             <div 
-              ref={downloadPitchRef}
+              ref={pitchRef}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerUp}
               className={`relative aspect-[3/4] ${pitchThemes[pitchTheme]} overflow-hidden touch-auto rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg md:shadow-xl lg:shadow-2xl border-4 md:border-6 lg:border-8 border-white/60`}
             >
               {/* Grid Overlay */}
@@ -1095,7 +1254,7 @@ const shareLineup = async () => {
                   onClick={() => setShowDownloadOptions(true)}
                   disabled={isDownloading}
                   className={`p-2 md:p-3 ${isDownloading ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-white/95 backdrop-blur'} rounded-full shadow-lg md:shadow-xl hover:shadow-xl md:hover:shadow-2xl active:scale-90 transition-all duration-200 ${isDownloading ? 'cursor-not-allowed' : 'hover:bg-white'}`}
-                  title="Download Pitch"
+                  title="Download Lineup"
                 >
                   {isDownloading ? (
                     <svg className="w-4 h-4 md:w-5 md:h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
@@ -1168,7 +1327,7 @@ const shareLineup = async () => {
                   className="flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity text-sm"
                 >
                   <Download className="w-4 h-4" />
-                  Download Pitch
+                  Download Options
                 </button>
               </div>
             )}
@@ -1297,7 +1456,7 @@ const shareLineup = async () => {
                     className="w-full flex items-center justify-center gap-2 md:gap-3 p-3 md:p-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl md:rounded-2xl hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 text-sm md:text-base"
                   >
                     <Download className="w-4 h-4 md:w-5 md:h-5" />
-                    Download Pitch Image
+                    Download Lineup
                   </button>
                 </>
               )}
@@ -1306,20 +1465,20 @@ const shareLineup = async () => {
               <div className="p-3 md:p-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl md:rounded-2xl border border-emerald-100">
                 <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
                   <Camera className="w-4 h-4 md:w-5 md:h-5 text-emerald-600" />
-                  <h4 className="font-bold text-sm md:text-base text-emerald-900">Pitch Download</h4>
+                  <h4 className="font-bold text-sm md:text-base text-emerald-900">Download Feature</h4>
                 </div>
                 <ul className="text-xs md:text-sm text-emerald-800 space-y-1">
                   <li className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
-                    <span>Only the pitch area is included</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
-                    <span>Includes draftmasterfc.com watermark</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
                     <span>High-quality PNG & JPEG formats</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
+                    <span>Mobile-friendly download options</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1"></div>
+                    <span>draftmasterfc.com watermark included</span>
                   </li>
                 </ul>
               </div>
@@ -1346,7 +1505,7 @@ const shareLineup = async () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1"></div>
-                  <span>Download includes watermark in bottom right</span>
+                  <span>Tap Download for saving options</span>
                 </li>
               </ul>
             </div>
@@ -1369,7 +1528,7 @@ const shareLineup = async () => {
               className="w-full max-w-sm py-5 bg-gradient-to-r from-zinc-900 via-black to-zinc-900 text-white font-black rounded-2xl text-base tracking-widest shadow-2xl hover:shadow-3xl transition-all duration-300 active:scale-95 uppercase flex items-center justify-center gap-3"
             >
               <Download className="w-5 h-5" />
-              Download Pitch Image
+              Download & Export Lineup
             </button>
           </div>
         )}
