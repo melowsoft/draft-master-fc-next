@@ -74,7 +74,7 @@ const PitchPreview: React.FC = () => {
     { id: '5-3-2', name: '5-3-2 Defensive', positions: [[15,35],[30,35],[50,35],[70,35],[85,35],[30,55],[50,55],[70,55],[35,75],[65,75]], description: 'Solid Defense' },
   ]);
 
-  const [selectedFormation, setSelectedFormation] = useState<string>('4-4-2');
+  const [selectedFormation, setSelectedFormation] = useState<string>('3-5-2');
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
   const [isDraggingPlayer, setIsDraggingPlayer] = useState(false);
 
