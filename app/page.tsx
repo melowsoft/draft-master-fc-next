@@ -65,7 +65,7 @@ export default function Page() {
 
       <AiFeatures />
 
-      <section className="py-24 bg-green-600 relative overflow-hidden">
+      <section id="download" className="py-24 bg-green-600 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-black text-black mb-8">READY TO DRAFT YOUR LEGACY?</h2>
@@ -73,13 +73,15 @@ export default function Page() {
             Join 50,000+ football tacticians building the future of the beautiful game.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="px-10 py-5 bg-black text-white rounded-xl font-bold text-lg hover:bg-zinc-900 transition-all flex items-center justify-center gap-3">
+            {/* <button className="px-10 py-5 bg-black text-white rounded-xl font-bold text-lg hover:bg-zinc-900 transition-all flex items-center justify-center gap-3">
               <Smartphone className="w-6 h-6" />
               GET THE APP
-            </button>
-            <button className="px-10 py-5 bg-white text-black rounded-xl font-bold text-lg hover:bg-zinc-100 transition-all">
+            </button> */}
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSeObJcQlpob06ylR3AYH3Ek38ZIq2ol1cR0sE5sLNzW6cAlCw/viewform?usp=header" target="_blank" rel="noopener noreferrer">
+            <button  className="px-10 py-5 bg-white text-black rounded-xl font-bold text-lg hover:bg-zinc-100 transition-all">
               JOIN THE WAITLIST
-            </button>
+              </button>
+            </a>
           </div>
         </div>
       </section>

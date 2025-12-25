@@ -23,9 +23,12 @@ const Navbar: React.FC = () => {
             <Link href="/#builder" className="text-zinc-400 hover:text-white transition-colors font-medium text-sm tracking-wide">LINEUP BUILDER</Link>
             <Link href="/#versus" className="text-zinc-400 hover:text-white transition-colors font-medium text-sm tracking-wide">VERSUS MODE</Link>
             <Link href="/#ai" className="text-zinc-400 hover:text-white transition-colors font-medium text-sm tracking-wide">AI TACTICS</Link>
-            <button className="px-6 py-2.5 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 transition-colors text-sm">
-              GET APP
-            </button>
+            
+            <Link href="/#download" className="px-6 py-2.5 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 transition-colors text-sm tracking-wide">
+             GET APP
+            </Link>
+           
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -41,9 +44,11 @@ const Navbar: React.FC = () => {
           <Link href="/#builder" onClick={() => setIsOpen(false)} className="text-xl font-bold">Lineup Builder</Link>
           <Link href="/#versus" onClick={() => setIsOpen(false)} className="text-xl font-bold">Versus Mode</Link>
           <Link href="/#ai" onClick={() => setIsOpen(false)} className="text-xl font-bold">AI Tactics</Link>
-          <button className="w-full py-4 bg-green-500 text-black font-black rounded-xl">
-            DOWNLOAD NOW
-          </button>
+
+
+          <Link href="/#download" onClick={() => setIsOpen(false)} className="w-full py-4 bg-green-500 text-black font-black rounded-xl text-center">
+            GET APP
+          </Link>
         </div>
       )}
     </nav>

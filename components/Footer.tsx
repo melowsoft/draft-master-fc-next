@@ -7,11 +7,11 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-zinc-950 border-t border-zinc-900 py-16">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
-                <Trophy className="text-black w-5 h-5" />
+               <img src="/icon.png" alt="DraftMaster FC" className="" />
               </div>
               <Link href="/" className="text-xl font-black tracking-tighter">DRAFTMASTER <span className="text-green-500">FC</span></Link>
             </div>
@@ -25,14 +25,6 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="text-white font-bold mb-6 text-sm tracking-widest uppercase">Popular Leagues</h4>
-            <ul className="space-y-4 text-zinc-500 text-sm">
-              <li><a href="#" className="hover:text-green-500 transition-colors">Premier League</a></li>
-              <li><a href="#" className="hover:text-green-500 transition-colors">EFL Championship</a></li>
-            </ul>
-          </div>
-
-          <div>
             <h4 className="text-white font-bold mb-6 text-sm tracking-widest uppercase">Legal</h4>
             <ul className="space-y-4 text-zinc-500 text-sm">
               <li><Link href="/terms" className="hover:text-green-500 transition-colors">Terms of Service</Link></li>
@@ -40,19 +32,6 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
-          <div>
-            <h4 className="text-white font-bold mb-6 text-sm tracking-widest uppercase">Newsletter</h4>
-            <div className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="Email address" 
-                className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-sm w-full focus:outline-none focus:border-green-500"
-              />
-              <button className="p-2 bg-green-500 text-black rounded-lg hover:bg-green-400 transition-colors">
-                <Mail className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
         </div>
         
         <div className="pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4 text-zinc-600 text-xs font-medium">
