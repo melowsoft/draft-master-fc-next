@@ -274,6 +274,10 @@ const PitchPreview: React.FC = () => {
     container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     container.style.color = '#111827';
     container.style.position = 'relative';
+    container.style.transform = 'none';
+    container.style.filter = 'none';
+    container.style.zoom = '1';
+
     
     const sanitizedTeamName = teamName || 'My Team';
     const sanitizedManagerName = managerName || 'My Manager';
@@ -381,358 +385,179 @@ const PitchPreview: React.FC = () => {
     return container;
   };
 
-  // Improved download function using html-to-image - PITCH ONLY WITH WATERMARK
-  const downloadPitchImage = async (format: 'png' | 'jpeg' = 'png') => {
-    if (isDownloading || !downloadPitchRef.current) return;
-    
-    setIsDownloading(true);
-    
-    try {
-      // Create a temporary container for the download
-      const container = createPitchOnlyElement();
-      document.body.appendChild(container);
-      
-      // Convert to image based on format
-      let dataUrl: string;
-      
-      if (format === 'png') {
-        dataUrl = await toPng(container, {
-          quality: 1.0,
-          backgroundColor: '#ffffff',
-          pixelRatio: 3, // High DPI
-          skipFonts: true,
-          cacheBust: true,
-          width: 1200,
-          height: 1600,
-        });
-      } else {
-        dataUrl = await toJpeg(container, {
-          quality: 0.95,
-          backgroundColor: '#ffffff',
-          pixelRatio: 3,
-          skipFonts: true,
-          cacheBust: true,
-          width: 1200,
-          height: 1600,
-        });
-      }
-      
-      // Remove the temporary container
-      document.body.removeChild(container);
-      
-      // Create filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
-      const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
-      
-      // Different download methods for mobile vs desktop
-      if (isMobile) {
-        await downloadForMobile(dataUrl, filename, format);
-      } else {
-        // Standard download for desktop
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = dataUrl;
-        link.click();
-      }
-      
-      // Show success message
-      setTimeout(() => {
-        alert(`Pitch image downloaded successfully as ${filename.toUpperCase()}!\n\nWatermark: draftmasterfc.com`);
-      }, 500);
-      
-    } catch (error) {
-      console.error('Error downloading pitch:', error);
-      
-      // Fallback method using the actual pitch element
-      try {
-        if (downloadPitchRef.current) {
-          const dataUrl = format === 'png' 
-            ? await toPng(downloadPitchRef.current, {
-                quality: 0.95,
-                backgroundColor: '#ffffff',
-                pixelRatio: 2,
-                skipFonts: true,
-              })
-            : await toJpeg(downloadPitchRef.current, {
-                quality: 0.9,
-                backgroundColor: '#ffffff',
-                pixelRatio: 2,
-                skipFonts: true,
-              });
-          
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-          const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
-          const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
-          
-          const link = document.createElement('a');
-          link.download = filename;
-          link.href = dataUrl;
-          link.click();
-        }
-      } catch (fallbackError) {
-        console.error('Fallback download also failed:', fallbackError);
-        alert('Failed to download pitch image. Please try again.');
-      }
-    } finally {
-      setIsDownloading(false);
-      setShowDownloadOptions(false);
-    }
-  };
+const getExportPixelRatio = () =>
+  Math.min(window.devicePixelRatio * 2, 4);
 
-  // Special handling for mobile downloads
-  const downloadForMobile = async (dataUrl: string, filename: string, format: string) => {
-    // Method 1: Try standard download first
-    try {
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = dataUrl;
-      
-      // For iOS Safari, we need to add to DOM and click
-      document.body.appendChild(link);
-      
-      // Create and dispatch click event
-      const clickEvent = new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-      });
-      link.dispatchEvent(clickEvent);
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(link);
-      }, 100);
-      
-      return;
-    } catch (error) {
-      console.log('Standard download failed on mobile, trying alternative...');
-    }
-    
-    // Method 2: Open in new tab for browsers that support it
-    try {
-      const newWindow = window.open();
-      if (newWindow) {
-        newWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>${filename}</title>
-            <style>
-              body { 
-                margin: 0; 
-                padding: 20px; 
-                background: #f3f4f6; 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
-                justify-content: center; 
-                min-height: 100vh; 
-                font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-              }
-              img { 
-                max-width: 100%; 
-                height: auto; 
-                border-radius: 20px; 
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
-                margin-bottom: 30px; 
-              }
-              .watermark-notice {
-                background: #3b82f6;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 10px;
-                margin-bottom: 20px;
-                text-align: center;
-                font-weight: 600;
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-              }
-              .instructions { 
-                background: white; 
-                padding: 25px; 
-                border-radius: 20px; 
-                margin: 20px 0; 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-                max-width: 500px; 
-                width: 100%; 
-              }
-              h1 { 
-                color: #111827; 
-                text-align: center; 
-                margin-bottom: 20px; 
-                font-size: 24px; 
-              }
-              p { 
-                color: #4b5563; 
-                line-height: 1.6; 
-                text-align: center; 
-                margin-bottom: 20px; 
-              }
-              .step { 
-                display: flex; 
-                align-items: center; 
-                gap: 20px; 
-                margin: 20px 0; 
-                text-align: left; 
-              }
-              .step-number { 
-                width: 40px; 
-                height: 40px; 
-                background: #3b82f6; 
-                color: white; 
-                border-radius: 50%; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                font-weight: bold; 
-                font-size: 18px; 
-                flex-shrink: 0; 
-              }
-              .button { 
-                background: #3b82f6; 
-                color: white; 
-                border: none; 
-                padding: 15px 30px; 
-                border-radius: 12px; 
-                font-size: 16px; 
-                font-weight: 600; 
-                cursor: pointer; 
-                margin-top: 20px; 
-                text-decoration: none; 
-                display: inline-block; 
-              }
-              .watermark-info {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                background: #f8fafc;
-                padding: 15px;
-                border-radius: 10px;
-                margin: 15px 0;
-                border: 2px solid #e2e8f0;
-              }
-              .check-icon {
-                width: 20px;
-                height: 20px;
-                background: #10b981;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-weight: bold;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>Your Pitch Lineup</h1>
-            <div class="watermark-notice">
-              ✓ Includes draftmasterfc.com watermark
-            </div>
-            <img src="${dataUrl}" alt="${teamName} Lineup" />
-            <div class="instructions">
-              <p><strong>To save this pitch image to your device:</strong></p>
-              <div class="step">
-                <div class="step-number">1</div>
-                <div>Long press (touch and hold) the image above</div>
-              </div>
-              <div class="step">
-                <div class="step-number">2</div>
-                <div>Select "Save Image" or "Download Image" from the menu</div>
-              </div>
-              <div class="step">
-                <div class="step-number">3</div>
-                <div>Choose where to save it on your device</div>
-              </div>
-              <div class="watermark-info">
-                <div class="check-icon">✓</div>
-                <div>
-                  <strong>Watermark Included</strong><br>
-                  <small>Bottom right corner: draftmasterfc.com</small>
-                </div>
-              </div>
-              <p style="margin-top: 20px; font-size: 14px; color: #6b7280;">
-                The image is high quality and ready for sharing!
-              </p>
-            </div>
-            <button class="button" onclick="window.close()">Close Window</button>
-          </body>
-          </html>
-        `);
-        newWindow.document.close();
-        return;
-      }
-    } catch (error) {
-      console.log('New window method failed');
-    }
-    
-    // Method 3: Use share API if available (iOS/Android)
-    if (navigator.share && navigator.canShare) {
-      try {
-        // Convert dataUrl to blob
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        
-        const file = new File([blob], filename, { type: format === 'png' ? 'image/png' : 'image/jpeg' });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: `${teamName} Lineup - draftmasterfc.com`,
-            text: `Check out my ${teamName} lineup created with DraftMaster FC! #DraftMasterFC`,
+/**
+ * Ensures fonts + layout are fully ready before snapshot
+ */
+const prepareForExport = async (container: HTMLElement) => {
+  await document.fonts.ready;
+
+  container.style.transform = 'none';
+  container.style.filter = 'none';
+  container.style.zoom = '1';
+};
+
+/**
+ * Main download function
+ */
+const downloadPitchImage = async (format: 'png' | 'jpeg' = 'png') => {
+  if (isDownloading || !downloadPitchRef.current) return;
+
+  setIsDownloading(true);
+
+  let container: HTMLElement | null = null;
+
+  try {
+    container = createPitchOnlyElement();
+    document.body.appendChild(container);
+
+    await prepareForExport(container);
+
+    const pixelRatio = getExportPixelRatio();
+
+    const dataUrl =
+      format === 'png'
+        ? await toPng(container, {
+            backgroundColor: '#ffffff',
+            pixelRatio,
+            cacheBust: true,
+            skipFonts: false,
+          })
+        : await toJpeg(container, {
+            backgroundColor: '#ffffff',
+            pixelRatio: Math.max(pixelRatio, 3),
+            quality: 1,
+            cacheBust: true,
+            skipFonts: false,
           });
-          return;
-        }
-      } catch (shareError) {
-        console.log('Share API not available or failed:', shareError);
-      }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const sanitizedTeamName =
+      teamName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'my-team';
+
+    const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
+
+    if (isMobile) {
+      await downloadForMobile(dataUrl, filename, format);
+    } else {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename;
+      link.click();
     }
-    
-    // Method 4: Last resort - show data URL in alert for manual save
-    alert(`To save your pitch image:\n\n1. Copy this link: ${dataUrl.substring(0, 100)}...\n2. Open it in a new tab\n3. Long press to save\n\n✓ Includes draftmasterfc.com watermark`);
-  };
+
+    setTimeout(() => {
+      alert(
+        `Pitch image downloaded successfully!\n\n✓ High-resolution\n✓ Crisp text\n✓ draftmasterfc.com watermark`
+      );
+    }, 400);
+  } catch (error) {
+    console.error('Export failed:', error);
+    alert('Failed to export image. Please try again.');
+  } finally {
+    if (container) {
+      document.body.removeChild(container);
+    }
+    setIsDownloading(false);
+    setShowDownloadOptions(false);
+  }
+};
+
+
+ const downloadForMobile = async (
+  dataUrl: string,
+  filename: string,
+  format: string
+) => {
+  try {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+
+    setTimeout(() => document.body.removeChild(link), 100);
+    return;
+  } catch {}
+
+  try {
+    const newWindow = window.open();
+    if (!newWindow) return;
+
+    newWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${filename}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </head>
+        <body style="margin:0;background:#f3f4f6;text-align:center">
+          <img 
+            src="${dataUrl}" 
+            style="max-width:100%;height:auto;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25)" 
+          />
+          <p style="padding:20px;font-family:-apple-system">
+            Long-press the image to save it.<br />
+            ✓ High-resolution PNG
+          </p>
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+  } catch {}
+};
+
 
   // Share functionality for social media
-  const shareLineup = async () => {
-    if (navigator.share) {
-      try {
-        // Create a pitch-only image for sharing
-        const container = createPitchOnlyElement();
-        document.body.appendChild(container);
-        
-        const dataUrl = await toPng(container, {
-          quality: 0.8,
-          backgroundColor: '#ffffff',
-          pixelRatio: 2,
-        });
-        
-        document.body.removeChild(container);
-        
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], 'pitch-lineup.png', { type: 'image/png' });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: `${teamName} Football Lineup - draftmasterfc.com`,
-            text: `Check out my ${teamName} football lineup created with DraftMaster FC! ⚽ #FootballLineup #DraftMasterFC`,
-          });
-        } else {
-          await navigator.share({
-            title: `${teamName} Football Lineup - draftmasterfc.com`,
-            text: `Check out my ${teamName} football lineup created with DraftMaster FC! ⚽ #FootballLineup #DraftMasterFC`,
-            url: window.location.href,
-          });
-        }
-      } catch (error) {
-        console.error('Error sharing:', error);
-        alert('Share failed. Please use the download option instead.');
-      }
-    } else {
-      alert('Share feature is available on mobile devices. Please use the download option on desktop.');
+const shareLineup = async () => {
+  if (!navigator.share) {
+    alert('Sharing is available on mobile devices only.');
+    return;
+  }
+
+  let container: HTMLElement | null = null;
+
+  try {
+    container = createPitchOnlyElement();
+    document.body.appendChild(container);
+
+    await prepareForExport(container);
+
+    const dataUrl = await toPng(container, {
+      backgroundColor: '#ffffff',
+      pixelRatio: getExportPixelRatio(),
+      skipFonts: false,
+    });
+
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], 'pitch-lineup.png', {
+      type: 'image/png',
+    });
+
+    if (navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: `${teamName} Lineup`,
+        text: `My football lineup created with DraftMaster FC ⚽`,
+      });
     }
-  };
+  } catch (error) {
+    console.error('Share failed:', error);
+    alert('Unable to share. Please download instead.');
+  } finally {
+    if (container) {
+      document.body.removeChild(container);
+    }
+  }
+};
+
 
   // Render player component for the interactive view
   const renderPlayer = (p: Player) => {
