@@ -10,7 +10,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup Builder",
+    default: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup",
     template: '%s | DraftMaster FC',
   },
   description:
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup Builder",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup",
     description:
-      'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
+      'DraftMaster FC is the ultimate football drafting and formation builder platform where fans create lineups for premier leagues, champions leagues etc, compare players, build dream teams, and debate the greatest football squads of all time. Design tactical formations, draft legends and modern stars, analyze player stats, and share your teams with a global football community. Perfect for football fans, armchair managers, and fantasy football lovers worldwide.',
     url: siteUrl,
     siteName: 'DraftMaster FC',
     locale: 'en_GB',
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup Builder",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup",
     description:
-      'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
+      'DraftMaster FC is the ultimate football drafting and formation builder platform where fans create lineups for premier leagues, champions leagues etc, compare players, build dream teams, and debate the greatest football squads of all time. Design tactical formations, draft legends and modern stars, analyze player stats, and share your teams with a global football community. Perfect for football fans, armchair managers, and fantasy football lovers worldwide.',
   },
   robots: {
     index: true,
