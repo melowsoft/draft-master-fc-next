@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineups",
     description:
       'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
-    url: '/',
+    url: siteUrl,
     siteName: 'DraftMaster FC',
     locale: 'en_GB',
     type: 'website',
