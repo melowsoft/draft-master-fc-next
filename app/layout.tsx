@@ -10,7 +10,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup builder UK",
+    default: "DraftMaster FC | UK's #1 Football Squad Builder | Lineups",
     template: '%s | DraftMaster FC',
   },
   description:
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup builder UK",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineups",
     description:
       'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
     url: '/',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup builder UK",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineups",
     description:
       'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
   },
