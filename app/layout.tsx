@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     type: 'website',
      images: [
   {
-    url: `${siteUrl}/opengraph-image.png`, // Absolute URL
+    url: `${siteUrl}/opengraph.png`, // Absolute URL
     width: 1200,
     height: 630,
     alt: "DraftMaster FC",
