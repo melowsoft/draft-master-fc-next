@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight, Play } from 'lucide-react';
+import Link from 'next/link';
 
 const Hero: React.FC = () => {
   return (
@@ -46,16 +47,16 @@ const Hero: React.FC = () => {
             aria-label="Main actions"
             className="flex flex-col sm:flex-row items-center gap-6 mb-16"
           >
-            <button 
-              className="group relative px-8 py-4 bg-green-500 text-black font-black text-lg rounded-xl flex items-center gap-2 hover:bg-green-400 transition-all transform hover:scale-105 active:scale-95"
-              aria-label="Build your football lineup"
-            >
-              BUILD YOUR LINEUP
+            
+            <Link href="/#builder" className="group relative px-8 py-4 bg-green-500 text-black font-black text-lg rounded-xl flex items-center gap-2 hover:bg-green-400 transition-all transform hover:scale-105 active:scale-95"  aria-label="Build your football lineup">
+
+                BUILD YOUR LINEUP
               <ChevronRight 
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform" 
                 aria-hidden="true"
               />
-            </button>
+            </Link>  
+          
             <button 
               className="flex items-center gap-3 text-white font-bold text-lg hover:text-green-500 transition-colors"
               aria-label="Watch how the football squad builder works"
