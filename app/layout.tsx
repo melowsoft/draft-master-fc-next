@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s | DraftMaster FC',
   },
   description:
-    'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad builder for Premier League, EFL, and classic fans.',
+    'DraftMaster FC is the ultimate football drafting and formation builder platform where fans create lineups for premier leagues, champions leagues etc, compare players, build dream teams, and debate the greatest football squads of all time. Design tactical formations, draft legends and modern stars, analyze player stats, and share your teams with a global football community. Perfect for football fans, armchair managers, and fantasy football lovers worldwide.',
   keywords: [
     'football squad builder',
     'lineup maker uk',
