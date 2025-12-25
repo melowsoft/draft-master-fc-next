@@ -18,8 +18,9 @@ export const metadata: Metadata = {
   keywords: [
     'football squad builder',
     'lineup maker uk',
+    'formation maker uk',
     'premier league draft app',
-    'fantasy football tactics',
+    'lineup builder',
   ],
   alternates: {
     canonical: '/',
@@ -32,6 +33,15 @@ export const metadata: Metadata = {
     siteName: 'DraftMaster FC',
     locale: 'en_GB',
     type: 'website',
+     images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "DraftMaster FC | UK's #1 Football Squad Builder",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
@@ -49,6 +59,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
       'max-video-preview': -1,
     },
+  },
+  icons: {
+    icon: "/favicon.ico",
   },
 };
 

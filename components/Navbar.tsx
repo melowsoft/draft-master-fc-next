@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-20">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-              <Trophy className="text-black w-6 h-6" />
+              <img src="/icon.png" alt="DraftMaster FC" className="" />
             </div>
             <span className="text-2xl font-black tracking-tighter">DRAFTMASTER <span className="text-green-500">FC</span></span>
           </Link>
