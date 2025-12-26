@@ -8,7 +8,7 @@ import {
   Trophy, Grid3x3, Eye, Type, Building,
   CheckSquare, Square, Edit2, Edit3, Settings,
   PenTool, User, Camera, Goal, Menu, ChevronLeft,
-  Palette as ColorPalette
+  Palette as ColorPalette, Text, UserPlus
 } from 'lucide-react';
 import { toPng, toJpeg, toBlob } from 'html-to-image';
 
@@ -73,6 +73,7 @@ const PitchPreview: React.FC = () => {
   // Display Settings
   const [globalShowNames, setGlobalShowNames] = useState(true);
   const [globalShowClubs, setGlobalShowClubs] = useState(true);
+  const [showTeamInfo, setShowTeamInfo] = useState(true); // NEW: Toggle for team/manager name
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   
   // Color Picker State
@@ -222,6 +223,11 @@ const PitchPreview: React.FC = () => {
     const newState = !globalShowClubs;
     setGlobalShowClubs(newState);
     setPlayers(prev => prev.map(p => ({ ...p, showClub: newState })));
+  };
+
+  // NEW: Toggle team info display
+  const toggleTeamInfo = () => {
+    setShowTeamInfo(!showTeamInfo);
   };
 
   // Update player name or club
@@ -465,20 +471,22 @@ const PitchPreview: React.FC = () => {
           `;
         }).join('')}
         
-        <!-- Team Name Overlay (Top Center) -->
-        <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;">
-          <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.4);">
-            <h2 style="color: #111827; font-size: 24px; font-weight: 900; margin: 0 0 4px 0; text-align: center; white-space: nowrap;">
-              ${sanitizedTeamName}
-            </h2>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <svg width="16" height="16" fill="#6b7280" viewBox="0 0 24 24">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
-              <span style="color: #6b7280; font-size: 16px; font-weight: 600;">${sanitizedManagerName}</span>
+        <!-- Team Name Overlay (Top Center) - Only show if showTeamInfo is true -->
+        ${showTeamInfo ? `
+          <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;">
+            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.4);">
+              <h2 style="color: #111827; font-size: 24px; font-weight: 900; margin: 0 0 4px 0; text-align: center; white-space: nowrap;">
+                ${sanitizedTeamName}
+              </h2>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <svg width="16" height="16" fill="#6b7280" viewBox="0 0 24 24">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <span style="color: #6b7280; font-size: 16px; font-weight: 600;">${sanitizedManagerName}</span>
+              </div>
             </div>
           </div>
-        </div>
+        ` : ''}
         
         <!-- Formation Overlay (Top Right) -->
         <div style="position: absolute; top: 20px; right: 20px; z-index: 5;">
@@ -517,6 +525,12 @@ const PitchPreview: React.FC = () => {
             <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
               <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
               <span style="color: #111827; font-size: 11px; font-weight: 700;">Clubs ON</span>
+            </div>
+          ` : ''}
+          ${showTeamInfo ? `
+            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
+              <span style="color: #111827; font-size: 11px; font-weight: 700;">Team Info ON</span>
             </div>
           ` : ''}
         </div>
@@ -1096,58 +1110,67 @@ const PitchPreview: React.FC = () => {
         {isMobile && (
           <div className="lg:hidden flex flex-col items-center justify-center p-4 bg-white border-b border-zinc-100">
             <div className="text-center mb-4">
-              {/* Team Name - Mobile Editable */}
-              {isEditingTeamName ? (
-                <div className="relative mb-2">
-                  <input
-                    type="text"
-                    value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
-                    onBlur={() => setIsEditingTeamName(false)}
-                    onKeyDown={(e) => e.key === 'Enter' && setIsEditingTeamName(false)}
-                    className="text-xl font-black text-center bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-700 pb-1 w-full"
-                    autoFocus
-                    maxLength={40}
-                  />
-                  <PenTool className="absolute -right-6 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-600 animate-pulse" />
-                </div>
-              ) : (
-                <h2 
-                  onClick={() => setIsEditingTeamName(true)}
-                  className="text-xl font-black mb-2 tracking-tight text-zinc-900 hover:text-blue-700 cursor-pointer transition-colors group relative inline-block"
-                >
-                  {teamName}
-                  <Edit2 className="absolute -right-5 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </h2>
-              )}
+              {/* Team Name - Mobile Editable - Only show if showTeamInfo is true */}
+              {showTeamInfo ? (
+                <>
+                  {isEditingTeamName ? (
+                    <div className="relative mb-2">
+                      <input
+                        type="text"
+                        value={teamName}
+                        onChange={(e) => setTeamName(e.target.value)}
+                        onBlur={() => setIsEditingTeamName(false)}
+                        onKeyDown={(e) => e.key === 'Enter' && setIsEditingTeamName(false)}
+                        className="text-xl font-black text-center bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-700 pb-1 w-full"
+                        autoFocus
+                        maxLength={40}
+                      />
+                      <PenTool className="absolute -right-6 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-600 animate-pulse" />
+                    </div>
+                  ) : (
+                    <h2 
+                      onClick={() => setIsEditingTeamName(true)}
+                      className="text-xl font-black mb-2 tracking-tight text-zinc-900 hover:text-blue-700 cursor-pointer transition-colors group relative inline-block"
+                    >
+                      {teamName}
+                      <Edit2 className="absolute -right-5 top-1/2 -translate-y-1/2 w-3 h-3 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </h2>
+                  )}
 
-              {/* Manager Name - Mobile Editable */}
-              <div className="flex items-center justify-center gap-2">
-                <User className="w-3 h-3 text-zinc-400" />
-                {isEditingManagerName ? (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={managerName}
-                      onChange={(e) => setManagerName(e.target.value)}
-                      onBlur={() => setIsEditingManagerName(false)}
-                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingManagerName(false)}
-                      className="text-sm text-center bg-transparent border-b border-blue-400 focus:outline-none focus:border-blue-600 pb-0.5 w-32"
-                      autoFocus
-                      maxLength={30}
-                    />
-                    <PenTool className="absolute -right-5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-blue-500 animate-pulse" />
+                  {/* Manager Name - Mobile Editable - Only show if showTeamInfo is true */}
+                  <div className="flex items-center justify-center gap-2">
+                    <User className="w-3 h-3 text-zinc-400" />
+                    {isEditingManagerName ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={managerName}
+                          onChange={(e) => setManagerName(e.target.value)}
+                          onBlur={() => setIsEditingManagerName(false)}
+                          onKeyDown={(e) => e.key === 'Enter' && setIsEditingManagerName(false)}
+                          className="text-sm text-center bg-transparent border-b border-blue-400 focus:outline-none focus:border-blue-600 pb-0.5 w-32"
+                          autoFocus
+                          maxLength={30}
+                        />
+                        <PenTool className="absolute -right-5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-blue-500 animate-pulse" />
+                      </div>
+                    ) : (
+                      <p 
+                        onClick={() => setIsEditingManagerName(true)}
+                        className="text-zinc-600 text-sm font-medium hover:text-blue-600 cursor-pointer transition-colors group relative"
+                      >
+                        {managerName}
+                        <Edit3 className="absolute -right-5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p 
-                    onClick={() => setIsEditingManagerName(true)}
-                    className="text-zinc-600 text-sm font-medium hover:text-blue-600 cursor-pointer transition-colors group relative"
-                  >
-                    {managerName}
-                    <Edit3 className="absolute -right-5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </p>
-                )}
-              </div>
+                </>
+              ) : (
+                <div className="mb-4">
+                  <p className="text-sm text-zinc-500 italic">Team info is hidden</p>
+                  <p className="text-xs text-zinc-400">Toggle "Team Info" in settings to show</p>
+                </div>
+              )}
             </div>
             
             <div className="flex items-center justify-between w-full">
@@ -1203,62 +1226,72 @@ const PitchPreview: React.FC = () => {
             </div>
 
             <div className="text-center max-w-xl px-4">
-              {isEditingTeamName ? (
-                <div className="relative mb-2">
-                  <input
-                    type="text"
-                    value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
-                    onBlur={() => setIsEditingTeamName(false)}
-                    onKeyDown={(e) => e.key === 'Enter' && setIsEditingTeamName(false)}
-                    className="text-2xl lg:text-4xl font-black text-center bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-700 pb-1 lg:pb-2 w-full"
-                    autoFocus
-                    maxLength={40}
-                  />
-                  <PenTool className="absolute -right-6 lg:-right-10 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-blue-600 animate-pulse" />
-                </div>
-              ) : (
-                <h2 
-                  onClick={() => setIsEditingTeamName(true)}
-                  className="text-2xl lg:text-4xl font-black mb-2 tracking-tight text-zinc-900 hover:text-blue-700 cursor-pointer transition-colors group relative inline-block"
-                >
-                  {teamName}
-                  <Edit2 className="absolute -right-6 lg:-right-10 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </h2>
-              )}
+              {/* Team Name and Manager - Only show if showTeamInfo is true */}
+              {showTeamInfo ? (
+                <>
+                  {isEditingTeamName ? (
+                    <div className="relative mb-2">
+                      <input
+                        type="text"
+                        value={teamName}
+                        onChange={(e) => setTeamName(e.target.value)}
+                        onBlur={() => setIsEditingTeamName(false)}
+                        onKeyDown={(e) => e.key === 'Enter' && setIsEditingTeamName(false)}
+                        className="text-2xl lg:text-4xl font-black text-center bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-700 pb-1 lg:pb-2 w-full"
+                        autoFocus
+                        maxLength={40}
+                      />
+                      <PenTool className="absolute -right-6 lg:-right-10 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-blue-600 animate-pulse" />
+                    </div>
+                  ) : (
+                    <h2 
+                      onClick={() => setIsEditingTeamName(true)}
+                      className="text-2xl lg:text-4xl font-black mb-2 tracking-tight text-zinc-900 hover:text-blue-700 cursor-pointer transition-colors group relative inline-block"
+                    >
+                      {teamName}
+                      <Edit2 className="absolute -right-6 lg:-right-10 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </h2>
+                  )}
 
-              <div className="flex items-center justify-center gap-2 lg:gap-3 mt-2 lg:mt-4">
-                <User className="w-4 h-4 lg:w-5 lg:h-5 text-zinc-400" />
-                {isEditingManagerName ? (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={managerName}
-                      onChange={(e) => setManagerName(e.target.value)}
-                      onBlur={() => setIsEditingManagerName(false)}
-                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingManagerName(false)}
-                      className="text-base lg:text-xl text-center bg-transparent border-b border-blue-400 focus:outline-none focus:border-blue-600 pb-0.5 lg:pb-1 w-32 lg:w-48"
-                      autoFocus
-                      maxLength={30}
-                    />
-                    <PenTool className="absolute -right-6 lg:-right-8 top-1/2 -translate-y-1/2 w-3 h-3 lg:w-4 lg:h-4 text-blue-500 animate-pulse" />
+                  <div className="flex items-center justify-center gap-2 lg:gap-3 mt-2 lg:mt-4">
+                    <User className="w-4 h-4 lg:w-5 lg:h-5 text-zinc-400" />
+                    {isEditingManagerName ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={managerName}
+                          onChange={(e) => setManagerName(e.target.value)}
+                          onBlur={() => setIsEditingManagerName(false)}
+                          onKeyDown={(e) => e.key === 'Enter' && setIsEditingManagerName(false)}
+                          className="text-base lg:text-xl text-center bg-transparent border-b border-blue-400 focus:outline-none focus:border-blue-600 pb-0.5 lg:pb-1 w-32 lg:w-48"
+                          autoFocus
+                          maxLength={30}
+                        />
+                        <PenTool className="absolute -right-6 lg:-right-8 top-1/2 -translate-y-1/2 w-3 h-3 lg:w-4 lg:h-4 text-blue-500 animate-pulse" />
+                      </div>
+                    ) : (
+                      <p 
+                        onClick={() => setIsEditingManagerName(true)}
+                        className="text-zinc-600 text-base lg:text-xl font-medium hover:text-blue-600 cursor-pointer transition-colors group relative"
+                      >
+                        {managerName}
+                        <Edit3 className="absolute -right-6 lg:-right-8 top-1/2 -translate-y-1/2 w-3 h-3 lg:w-4 lg:h-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p 
-                    onClick={() => setIsEditingManagerName(true)}
-                    className="text-zinc-600 text-base lg:text-xl font-medium hover:text-blue-600 cursor-pointer transition-colors group relative"
-                  >
-                    {managerName}
-                    <Edit3 className="absolute -right-6 lg:-right-8 top-1/2 -translate-y-1/2 w-3 h-3 lg:w-4 lg:h-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </p>
-                )}
-              </div>
 
-              <div className="mt-4 lg:mt-6">
-                <span className="text-xs lg:text-sm text-zinc-400 font-medium">
-                  Click team name or manager to edit
-                </span>
-              </div>
+                  <div className="mt-4 lg:mt-6">
+                    <span className="text-xs lg:text-sm text-zinc-400 font-medium">
+                      Click team name or manager to edit
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="py-4 lg:py-6">
+                  <p className="text-lg lg:text-xl text-zinc-500 italic">Team info is hidden</p>
+                  <p className="text-sm lg:text-base text-zinc-400">Toggle "Team Info" in settings to show</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1468,6 +1501,29 @@ const PitchPreview: React.FC = () => {
               </h3>
               
               <div className="space-y-3 md:space-y-4">
+                {/* Team Info Toggle - NEW */}
+                <div className="flex items-center justify-between p-3 md:p-4 bg-gradient-to-r from-zinc-50 to-zinc-100 rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="p-2 md:p-3 bg-white rounded-lg md:rounded-xl shadow-sm">
+                      <Text className="w-4 h-4 md:w-6 md:h-6 text-zinc-700" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm md:text-base text-zinc-900">Team Info</div>
+                      <div className="text-xs md:text-sm text-zinc-500">Show/hide team name & manager</div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={toggleTeamInfo}
+                    className={`p-2 md:p-3 rounded-lg md:rounded-xl transition-all duration-300 shadow-sm ${showTeamInfo ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600' : 'bg-gradient-to-r from-zinc-300 to-zinc-400 hover:from-zinc-400 hover:to-zinc-500'}`}
+                  >
+                    {showTeamInfo ? (
+                      <CheckSquare className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                    ) : (
+                      <Square className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                    )}
+                  </button>
+                </div>
+
                 {/* Player Names Toggle */}
                 <div className="flex items-center justify-between p-3 md:p-4 bg-gradient-to-r from-zinc-50 to-zinc-100 rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 md:gap-4">
@@ -1558,7 +1614,10 @@ const PitchPreview: React.FC = () => {
               {/* Current Settings Status */}
               <div className="mt-4 md:mt-6 p-3 md:p-4 bg-blue-50 rounded-lg md:rounded-xl border border-blue-100">
                 <div className="text-xs md:text-sm font-bold text-blue-900 mb-1 md:mb-2">Current Settings:</div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className={`px-2 py-1.5 md:px-3 md:py-2 rounded text-center text-xs md:text-sm font-medium ${showTeamInfo ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
+                    Team: {showTeamInfo ? 'ON' : 'OFF'}
+                  </div>
                   <div className={`px-2 py-1.5 md:px-3 md:py-2 rounded text-center text-xs md:text-sm font-medium ${globalShowNames ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     Names: {globalShowNames ? 'ON' : 'OFF'}
                   </div>
@@ -1644,7 +1703,7 @@ const PitchPreview: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1"></div>
-                  <span>Use toggles to show/hide names & clubs</span>
+                  <span>Use toggles to show/hide names, clubs & team info</span>
                 </li>
               </ul>
             </div>
