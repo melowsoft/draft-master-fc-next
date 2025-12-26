@@ -22,9 +22,9 @@ export interface Player {
   club: string;
   x: number;
   y: number;
-  role?: PlayerRole;
-  colors: [string, string];
-  position: Position;
+  role?: 'C' | 'V';
+  color: string; // Single color now
+  position: 'GKP' | 'DEF' | 'MID' | 'FWD';
   showName?: boolean;
   showClub?: boolean;
 }

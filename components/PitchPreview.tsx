@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { formations, getFormationById } from '../lib/formations';
-import type { FormationPosition } from '../utils/types';
+import type { FormationPosition, Player } from '../utils/types';
+import { JERSEY_COLORS } from '../lib/jersey-color-data';
 import { 
   X, Download, Share2, Palette, Save, Zap, 
   Trophy, Grid3x3, Eye, Type, Building,
@@ -12,39 +13,7 @@ import {
 } from 'lucide-react';
 import { toPng, toJpeg, toBlob } from 'html-to-image';
 
-// Define color options for player jerseys
-const JERSEY_COLORS = [
-  // Classic Football Colors
-  '#ef4444', // Red
-  '#3b82f6', // Blue
-  '#10b981', // Green
-  '#f59e0b', // Orange/Amber
-  '#8b5cf6', // Violet
-  '#ec4899', // Pink
-  '#000000', // Black
-  '#ffffff', // White
-  '#6b7280', // Gray
-  '#fbbf24', // Yellow
-  '#059669', // Emerald
-  '#6366f1', // Indigo
-  '#dc2626', // Strong Red
-  '#1d4ed8', // Navy Blue
-  '#047857', // Dark Green
-  '#7c3aed', // Purple
-];
 
-interface Player {
-  id: string;
-  name: string;
-  club: string;
-  x: number;
-  y: number;
-  role?: 'C' | 'V';
-  color: string; // Single color now
-  position: 'GKP' | 'DEF' | 'MID' | 'FWD';
-  showName?: boolean;
-  showClub?: boolean;
-}
 
 interface Formation {
   id: string;
@@ -72,7 +41,7 @@ const PitchPreview: React.FC = () => {
   
   // Display Settings
   const [globalShowNames, setGlobalShowNames] = useState(true);
-  const [globalShowClubs, setGlobalShowClubs] = useState(true);
+  const [globalShowClubs, setGlobalShowClubs] = useState(false);
   const [showTeamInfo, setShowTeamInfo] = useState(false); // NEW: Toggle for team/manager name
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   
@@ -433,8 +402,8 @@ const PitchPreview: React.FC = () => {
         
         <!-- Players -->
         ${players.map(p => {
-          const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
-          const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+           const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
+           const shouldShowClub =  globalShowClubs;
           
           const playerX = (p.x / 100) * width;
           const playerY = (p.y / 100) * height;
@@ -443,7 +412,7 @@ const PitchPreview: React.FC = () => {
             <div style="position: absolute; left: ${playerX}px; top: ${playerY}px; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
               <!-- Jersey -->
               <div style="position: relative; margin-bottom: 8px;">
-                <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid rgba(255,255,255,0.5); background: ${p.color};">
+                <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid rgba(255,255,255,0.5); background: ${p.color};">
                 </div>
                
                 <!-- Captain/Vice Badge -->
@@ -457,7 +426,7 @@ const PitchPreview: React.FC = () => {
               <!-- Name -->
               ${shouldShowName ? `
                 <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                  <span style="color: black; font-size: 14px; font-weight: 900; white-space: nowrap; letter-spacing: -0.2px;">${p.name}</span>
+                  <span style="color: black; font-size: 18px; font-weight: 900; white-space: nowrap; letter-spacing: -0.2px;">${p.name}</span>
                 </div>
               ` : ''}
               
@@ -509,7 +478,7 @@ const PitchPreview: React.FC = () => {
             <svg width="14" height="14" fill="#4b5563" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
-            <span style="color: #4b5563; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
+            <span style="color: #4b5563; font-size: 14px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
           </div>
         </div>
       </div>
@@ -816,7 +785,7 @@ const PitchPreview: React.FC = () => {
   // Render player component for the interactive view
   const renderPlayer = (p: Player) => {
     const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
-    const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+    const shouldShowClub =  globalShowClubs;
 
     return (
       <div 
