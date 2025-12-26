@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { formations, getFormationById } from '../lib/formations';
+import type { Formation, Player } from '../utils/types';
 import { 
   X, Download, Share2, Palette, Save, Zap, 
   Trophy, Grid3x3, Eye, Type, Building,
@@ -66,13 +68,7 @@ const PitchPreview: React.FC = () => {
     { id: '11', name: "Thiago", club: "LEE", x: 70, y: 75, colors: ["#ffffff", "#ef4444"], position: 'FWD', showName: true, showClub: true },
   ]);
 
-  // Available Formations
-  const [formations] = useState<Formation[]>([
-    { id: '4-4-2', name: '4-4-2 Classic', positions: [[30,35],[50,35],[70,35],[90,35],[20,55],[40,55],[60,55],[80,55],[35,75],[65,75]], description: 'Balanced' },
-    { id: '4-3-3', name: '4-3-3 Attacking', positions: [[30,35],[50,35],[70,35],[90,35],[30,55],[50,55],[70,55],[30,75],[50,75],[70,75]], description: 'Offensive' },
-    { id: '3-5-2', name: '3-5-2 Wing Play', positions: [[30,35],[50,35],[70,35],[15,55],[35,55],[50,55],[65,55],[85,55],[35,75],[65,75]], description: 'Midfield Control' },
-    { id: '5-3-2', name: '5-3-2 Defensive', positions: [[15,35],[30,35],[50,35],[70,35],[85,35],[30,55],[50,55],[70,55],[35,75],[65,75]], description: 'Solid Defense' },
-  ]);
+ 
 
   const [selectedFormation, setSelectedFormation] = useState<string>('3-5-2');
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
@@ -93,24 +89,25 @@ const PitchPreview: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Apply formation
-  const applyFormation = useCallback((formationId: string) => {
-    const formation = formations.find(f => f.id === formationId);
-    if (!formation) return;
+  // Update the applyFormation function:
+const applyFormation = useCallback((formationId: string) => {
+  const formation = getFormationById(formationId);
+  if (!formation) return;
 
-    const updatedPlayers = [...players];
-    formation.positions.forEach((pos, index) => {
-      if (updatedPlayers[index]) {
-        updatedPlayers[index] = {
-          ...updatedPlayers[index],
-          x: pos[0],
-          y: pos[1]
-        };
-      }
-    });
-    setPlayers(updatedPlayers);
-    setSelectedFormation(formationId);
-  }, [players, formations]);
+  const updatedPlayers = [...players];
+  formation.positions.forEach((pos, index) => {
+    if (updatedPlayers[index]) {
+      updatedPlayers[index] = {
+        ...updatedPlayers[index],
+        x: pos.x,
+        y: pos.y,
+        position: pos.position // This ensures players get correct positions
+      };
+    }
+  });
+  setPlayers(updatedPlayers);
+  setSelectedFormation(formationId);
+}, [players]);
 
   // Handle player movement - IMPROVED FOR MOBILE
   const handlePointerDown = (id: string, e: React.PointerEvent) => {
@@ -1174,11 +1171,15 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
             {/* Formation Selector - Mobile optimized */}
             <div className="mb-4 md:mb-6 lg:mb-8 overflow-x-auto">
               <div className="flex gap-2 pb-2 min-w-max">
-                {formations.map(f => (
+               {formations.map(f => (
                   <button
                     key={f.id}
                     onClick={() => applyFormation(f.id)}
-                    className={`px-4 py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3 rounded-full text-xs md:text-sm font-bold transition-all shadow-md hover:shadow-lg whitespace-nowrap ${selectedFormation === f.id ? 'bg-gradient-to-r from-zinc-900 to-black text-white shadow-lg scale-105' : 'bg-white text-zinc-700 hover:bg-zinc-50'}`}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      selectedFormation === f.id 
+                        ? 'bg-gradient-to-r from-zinc-900 to-black text-white shadow-lg' 
+                        : 'bg-white text-zinc-700 hover:bg-zinc-50'
+                    }`}
                   >
                     {f.id}
                   </button>
