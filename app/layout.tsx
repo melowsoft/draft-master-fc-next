@@ -10,11 +10,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup",
+    default: "DraftMaster FC | UK's #1 Football Squad Builder | EPL",
     template: '%s | DraftMaster FC',
   },
   description:
-    'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad or lineup builder for Premier League, EFL, and classic fans.',
+    'Build your perfect Starting XI with DraftMaster FC. Football Formation Builder & Draft Teams App for Premier League, EFL, and classic fans.',
   keywords: [
     'Create your team formations',
     'lineup maker uk',
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | EPL",
     description:
-      'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad or lineup builder for Premier League, EFL, and classic fans.',
+      'Build your perfect Starting XI with DraftMaster FC. Football Formation Builder & Draft Teams App for Premier League, EFL, and classic fans.',
     url: siteUrl,
     siteName: 'DraftMaster FC',
     locale: 'en_GB',
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "DraftMaster FC | UK's #1 Football Squad Builder | Lineup",
+    title: "DraftMaster FC | UK's #1 Football Squad Builder | EPL",
     description:
-      'Build your perfect Starting XI with DraftMaster FC. The ultimate football squad or lineup builder for Premier League, EFL, and classic fans.',
+      'Build your perfect Starting XI with DraftMaster FC. Football Formation Builder & Draft Teams App for Premier League, EFL, and classic fans.',
   },
   robots: {
     index: true,
