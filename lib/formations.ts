@@ -1,5 +1,5 @@
 // formations.ts
-import { Formation, FormationPosition, Position } from './types';
+import { Formation, FormationPosition, Position } from '../utils/types';
 
 const createPosition = (id: string, x: number, y: number, position: Position): FormationPosition => ({
   id,
