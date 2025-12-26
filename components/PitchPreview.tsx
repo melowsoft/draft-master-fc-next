@@ -2,14 +2,36 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { formations, getFormationById } from '../lib/formations';
-import type { Formation, Player } from '../utils/types';
+//import type { Formation, Player } from '../utils/types';
 import { 
   X, Download, Share2, Palette, Save, Zap, 
   Trophy, Grid3x3, Eye, Type, Building,
   CheckSquare, Square, Edit2, Edit3, Settings,
-  PenTool, User, Camera, Goal, Menu, ChevronLeft
+  PenTool, User, Camera, Goal, Menu, ChevronLeft,
+  Palette as ColorPalette
 } from 'lucide-react';
-import { toPng, toJpeg, toBlob, toSvg } from 'html-to-image';
+import { toPng, toJpeg, toBlob } from 'html-to-image';
+
+// Define color options for player jerseys
+const JERSEY_COLORS = [
+  // Classic Football Colors
+  '#ef4444', // Red
+  '#3b82f6', // Blue
+  '#10b981', // Green
+  '#f59e0b', // Orange/Amber
+  '#8b5cf6', // Violet
+  '#ec4899', // Pink
+  '#000000', // Black
+  '#ffffff', // White
+  '#6b7280', // Gray
+  '#fbbf24', // Yellow
+  '#059669', // Emerald
+  '#6366f1', // Indigo
+  '#dc2626', // Strong Red
+  '#1d4ed8', // Navy Blue
+  '#047857', // Dark Green
+  '#7c3aed', // Purple
+];
 
 interface Player {
   id: string;
@@ -18,7 +40,7 @@ interface Player {
   x: number;
   y: number;
   role?: 'C' | 'V';
-  colors: [string, string];
+  color: string; // Single color now
   position: 'GKP' | 'DEF' | 'MID' | 'FWD';
   showName?: boolean;
   showClub?: boolean;
@@ -53,22 +75,23 @@ const PitchPreview: React.FC = () => {
   const [globalShowClubs, setGlobalShowClubs] = useState(true);
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   
-  // Players State
+  // Color Picker State
+  const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
+  
+  // Players State - Updated to single color
   const [players, setPlayers] = useState<Player[]>([
-    { id: '1', name: "Raya", club: "WOL", x: 50, y: 15, colors: ["#ef4444", "#ef4444"], position: 'GKP', showName: true, showClub: true },
-    { id: '2', name: "Cash", club: "WHU", x: 30, y: 35, colors: ["#7c2d12", "#7dd3fc"], position: 'DEF', showName: true, showClub: true },
-    { id: '3', name: "Guéhi", club: "MCI", x: 50, y: 35, colors: ["#ef4444", "#3b82f6"], position: 'DEF', showName: true, showClub: true },
-    { id: '4', name: "Virgil", club: "6", x: 70, y: 35, colors: ["#ef4444", "#ef4444"], position: 'DEF', showName: true, showClub: true },
-    { id: '5', name: "Eze", club: "WOL", x: 20, y: 55, colors: ["#ef4444", "#ef4444"], position: 'MID', showName: true, showClub: true },
-    { id: '6', name: "Wilson", club: "BUR", x: 40, y: 55, colors: ["#ffffff", "#000000"], position: 'MID', showName: true, showClub: true },
-    { id: '7', name: "Semenyo", club: "MUN", x: 60, y: 55, colors: ["#450a0a", "#000000"], position: 'MID', showName: true, showClub: true },
-    { id: '8', name: "Bruno G.", club: "SUN", x: 80, y: 55, colors: ["#ffffff", "#000000"], position: 'MID', showName: true, showClub: true },
-    { id: '9', name: "Haaland", club: "CRY", x: 30, y: 75, role: 'V', colors: ["#93c5fd", "#93c5fd"], position: 'FWD', showName: true, showClub: true },
-    { id: '10', name: "Ekitiké", club: "39", x: 50, y: 75, role: 'C', colors: ["#ef4444", "#ef4444"], position: 'FWD', showName: true, showClub: true },
-    { id: '11', name: "Thiago", club: "LEE", x: 70, y: 75, colors: ["#ffffff", "#ef4444"], position: 'FWD', showName: true, showClub: true },
+    { id: '1', name: "Raya", club: "WOL", x: 50, y: 15, color: "#ef4444", position: 'GKP', showName: true, showClub: true },
+    { id: '2', name: "Cash", club: "WHU", x: 30, y: 35, color: "#ef4444", position: 'DEF', showName: true, showClub: true },
+    { id: '3', name: "Guéhi", club: "MCI", x: 50, y: 35, color: "#3b82f6", position: 'DEF', showName: true, showClub: true },
+    { id: '4', name: "Virgil", club: "6", x: 70, y: 35, color: "#ef4444", position: 'DEF', showName: true, showClub: true },
+    { id: '5', name: "Eze", club: "WOL", x: 20, y: 55, color: "#ef4444", position: 'MID', showName: true, showClub: true },
+    { id: '6', name: "Wilson", club: "BUR", x: 40, y: 55, color: "#000000", position: 'MID', showName: true, showClub: true },
+    { id: '7', name: "Semenyo", club: "MUN", x: 60, y: 55, color: "#450a0a", position: 'MID', showName: true, showClub: true },
+    { id: '8', name: "Bruno G.", club: "SUN", x: 80, y: 55, color: "#000000", position: 'MID', showName: true, showClub: true },
+    { id: '9', name: "Haaland", club: "CRY", x: 30, y: 75, role: 'V', color: "#3b82f6", position: 'FWD', showName: true, showClub: true },
+    { id: '10', name: "Ekitiké", club: "39", x: 50, y: 75, role: 'C', color: "#ef4444", position: 'FWD', showName: true, showClub: true },
+    { id: '11', name: "Thiago", club: "LEE", x: 70, y: 75, color: "#ef4444", position: 'FWD', showName: true, showClub: true },
   ]);
-
- 
 
   const [selectedFormation, setSelectedFormation] = useState<string>('3-5-2');
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null);
@@ -90,30 +113,31 @@ const PitchPreview: React.FC = () => {
   }, []);
 
   // Update the applyFormation function:
-const applyFormation = useCallback((formationId: string) => {
-  const formation = getFormationById(formationId);
-  if (!formation) return;
+  const applyFormation = useCallback((formationId: string) => {
+    const formation = getFormationById(formationId);
+    if (!formation) return;
 
-  const updatedPlayers = [...players];
-  formation.positions.forEach((pos, index) => {
-    if (updatedPlayers[index]) {
-      updatedPlayers[index] = {
-        ...updatedPlayers[index],
-        x: pos.x,
-        y: pos.y,
-        position: pos.position // This ensures players get correct positions
-      };
-    }
-  });
-  setPlayers(updatedPlayers);
-  setSelectedFormation(formationId);
-}, [players]);
+    const updatedPlayers = [...players];
+    formation.positions.forEach((pos, index) => {
+      if (updatedPlayers[index]) {
+        updatedPlayers[index] = {
+          ...updatedPlayers[index],
+          x: pos.x,
+          y: pos.y,
+          position: pos.position
+        };
+      }
+    });
+    setPlayers(updatedPlayers);
+    setSelectedFormation(formationId);
+  }, [players]);
 
-  // Handle player movement - IMPROVED FOR MOBILE
+  // Handle player movement
   const handlePointerDown = (id: string, e: React.PointerEvent) => {
     e.stopPropagation();
     setActivePlayerId(id);
     setIsDraggingPlayer(true);
+    setColorPickerOpen(null); // Close color picker when dragging
   };
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
@@ -139,17 +163,18 @@ const applyFormation = useCallback((formationId: string) => {
     setIsDraggingPlayer(false);
   }, []);
 
-  // Handle touch events specifically for mobile
+  // Handle touch events
   const handleTouchStart = useCallback((e: React.TouchEvent, id: string) => {
     e.stopPropagation();
     setActivePlayerId(id);
     setIsDraggingPlayer(true);
+    setColorPickerOpen(null);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!activePlayerId || !pitchRef.current || !isDraggingPlayer) return;
     
-    e.preventDefault(); // Prevent scrolling when dragging player
+    e.preventDefault();
     e.stopPropagation();
     const touch = e.touches[0];
     const rect = pitchRef.current.getBoundingClientRect();
@@ -212,6 +237,28 @@ const applyFormation = useCallback((formationId: string) => {
     ));
   };
 
+  // Update player color
+  const updatePlayerColor = (playerId: string, newColor: string) => {
+    setPlayers(prev => prev.map(p => 
+      p.id === playerId ? { ...p, color: newColor } : p
+    ));
+  };
+
+  // Set random color for player
+  const setRandomColor = (playerId: string) => {
+    const randomColor = JERSEY_COLORS[Math.floor(Math.random() * JERSEY_COLORS.length)];
+    updatePlayerColor(playerId, randomColor);
+  };
+
+  // Set player role
+  const setPlayerRole = (playerId: string, role: 'C' | 'V' | undefined) => {
+    setPlayers(prev => prev.map(p => 
+      p.role === role ? { ...p, role: undefined } : 
+      p.id === playerId ? { ...p, role } : 
+      p
+    ));
+  };
+
   // Swap players
   const swapPlayers = (player1Id: string, player2Id: string) => {
     setPlayers(prev => {
@@ -228,23 +275,7 @@ const applyFormation = useCallback((formationId: string) => {
     });
   };
 
-  // Customize player jersey
-  const customizeJersey = (playerId: string, colors: [string, string]) => {
-    setPlayers(prev => prev.map(p => 
-      p.id === playerId ? { ...p, colors } : p
-    ));
-  };
-
-  // Set player role
-  const setPlayerRole = (playerId: string, role: 'C' | 'V' | undefined) => {
-    setPlayers(prev => prev.map(p => 
-      p.role === role ? { ...p, role: undefined } : 
-      p.id === playerId ? { ...p, role } : 
-      p
-    ));
-  };
-
-  // Realistic Goal Component for Interactive Pitch
+  // Realistic Goal Component
   const GoalPost = ({ position = 'top' }: { position: 'top' | 'bottom' }) => (
     <div className={`absolute ${position === 'top' ? 'top-0' : 'bottom-0'} left-1/2 -translate-x-1/2 w-[90%] h-16 md:h-24 pointer-events-none z-0`}>
       {/* Goal Box - 6-yard box */}
@@ -261,450 +292,501 @@ const applyFormation = useCallback((formationId: string) => {
     </div>
   );
 
+  // Color Picker Component
+  const ColorPicker = ({ playerId, currentColor, onClose }: { 
+    playerId: string; 
+    currentColor: string; 
+    onClose: () => void;
+  }) => {
+    const handleColorSelect = (color: string) => {
+      updatePlayerColor(playerId, color);
+      onClose();
+    };
+
+    // Calculate position to avoid going off screen
+    const getPickerPosition = () => {
+      const player = players.find(p => p.id === playerId);
+      if (!player) return 'bottom';
+      
+      // If player is in bottom half of pitch, show picker above
+      if (player.y > 50) return 'top';
+      return 'bottom';
+    };
+
+    const position = getPickerPosition();
+
+    return (
+      <div className={`absolute ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-1/2 -translate-x-1/2 z-50`}>
+        <div className="bg-white rounded-xl shadow-2xl p-4 border border-zinc-200 min-w-[200px]">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-bold text-sm text-zinc-800">Jersey Color</h4>
+            <button 
+              onClick={onClose}
+              className="text-zinc-400 hover:text-zinc-600 p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {JERSEY_COLORS.map((color) => (
+              <button
+                key={color}
+                onClick={() => handleColorSelect(color)}
+                className={`w-8 h-8 rounded-full border-2 ${currentColor === color ? 'border-blue-500 scale-110' : 'border-zinc-200 hover:scale-105'} transition-all`}
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+          
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => {
+                const customColor = prompt('Enter hex color (e.g., #FF5733):', currentColor);
+                if (customColor && /^#[0-9A-F]{6}$/i.test(customColor)) {
+                  handleColorSelect(customColor);
+                } else if (customColor) {
+                  alert('Please enter a valid hex color (e.g., #FF5733)');
+                }
+              }}
+              className="text-sm font-medium text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              Custom Color...
+            </button>
+            <button
+              onClick={() => setRandomColor(playerId)}
+              className="text-sm font-medium text-purple-600 hover:text-purple-800 p-2 hover:bg-purple-50 rounded-lg transition-colors"
+            >
+              Random Color
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Create a clean version of ONLY the pitch area for download
-const createDownloadElement = () => {
-  const container = document.createElement('div');
-  
-  // Set 3:4 aspect ratio (portrait)
-  const width = 900; // 3x multiplier
-  const height = 1200; // 4x multiplier
-  
-  container.style.width = `${width}px`;
-  container.style.height = `${height}px`;
-  container.style.background = pitchTheme === 'green' ? 'linear-gradient(to bottom, #10b981, #059669)' : 
-                               pitchTheme === 'blue' ? 'linear-gradient(to bottom, #3b82f6, #1d4ed8)' : 
-                               pitchTheme === 'classic' ? 'linear-gradient(to bottom, #9ca3af, #6b7280)' : 
-                               'linear-gradient(to bottom, #1f2937, #111827)';
-  container.style.position = 'relative';
-  container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  container.style.color = '#111827';
-  container.style.overflow = 'hidden';
-  
-  const sanitizedTeamName = teamName || 'My Team';
-  const sanitizedManagerName = managerName || 'My Manager';
-  
-  container.innerHTML = `
-    <div style="width: 100%; height: 100%; position: relative;">
-      <!-- Pitch Outline -->
-      <div style="position: absolute; inset: 40px; border: 4px solid rgba(255,255,255,0.7); border-radius: 24px;"></div>
-      
-      <!-- Center Line -->
-      <div style="position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(255,255,255,0.7);"></div>
-      
-      <!-- Center Circle -->
-      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7);"></div>
-      
-      <!-- Center Spot -->
-      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
-      
-      <!-- TOP Goal Area -->
-      <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 85%; height: 90px;">
-        <!-- Penalty Area -->
-        <div style="position: absolute; top: 90px; left: 50%; transform: translateX(-50%); width: 70%; height: 110px; border: 3px solid rgba(255,255,255,0.7); border-top: none; border-radius: 0 0 20px 20px;"></div>
+  const createDownloadElement = () => {
+    const container = document.createElement('div');
+    
+    const width = 900;
+    const height = 1200;
+    
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+    container.style.background = pitchTheme === 'green' ? 'linear-gradient(to bottom, #10b981, #059669)' : 
+                                 pitchTheme === 'blue' ? 'linear-gradient(to bottom, #3b82f6, #1d4ed8)' : 
+                                 pitchTheme === 'classic' ? 'linear-gradient(to bottom, #9ca3af, #6b7280)' : 
+                                 'linear-gradient(to bottom, #1f2937, #111827)';
+    container.style.position = 'relative';
+    container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    container.style.color = '#111827';
+    container.style.overflow = 'hidden';
+    
+    const sanitizedTeamName = teamName || 'My Team';
+    const sanitizedManagerName = managerName || 'My Manager';
+    
+    container.innerHTML = `
+      <div style="width: 100%; height: 100%; position: relative;">
+        <!-- Pitch Outline -->
+        <div style="position: absolute; inset: 40px; border: 4px solid rgba(255,255,255,0.7); border-radius: 24px;"></div>
         
-        <!-- Penalty Spot -->
-        <div style="position: absolute; top: 200px; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+        <!-- Center Line -->
+        <div style="position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(255,255,255,0.7);"></div>
         
-        <!-- D-arc -->
-        <div style="position: absolute; top: 200px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 3px solid rgba(255,255,255,0.7); border-top: none; border-radius: 0 0 100px 100px;"></div>
-      </div>
-      
-      <!-- BOTTOM Goal Area -->
-      <div style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; height: 90px;">
-        <!-- Penalty Area -->
-        <div style="position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); width: 70%; height: 110px; border: 3px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 20px 20px 0 0;"></div>
+        <!-- Center Circle -->
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7);"></div>
         
-        <!-- Penalty Spot -->
-        <div style="position: absolute; bottom: 200px; left: 50%; transform: translate(-50%, 50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+        <!-- Center Spot -->
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
         
-        <!-- D-arc -->
-        <div style="position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 3px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 100px 100px 0 0;"></div>
-      </div>
-      
-      <!-- Players -->
-      ${players.map(p => {
-        const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
-        const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+        <!-- TOP Goal Area -->
+        <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 85%; height: 90px;">
+          <!-- Penalty Area -->
+          <div style="position: absolute; top: 90px; left: 50%; transform: translateX(-50%); width: 70%; height: 110px; border: 3px solid rgba(255,255,255,0.7); border-top: none; border-radius: 0 0 20px 20px;"></div>
+          
+          <!-- Penalty Spot -->
+          <div style="position: absolute; top: 200px; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+          
+          <!-- D-arc -->
+          <div style="position: absolute; top: 200px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 3px solid rgba(255,255,255,0.7); border-top: none; border-radius: 0 0 100px 100px;"></div>
+        </div>
         
-        // Scale positions from percentage to pixels
-        const playerX = (p.x / 100) * width;
-        const playerY = (p.y / 100) * height;
+        <!-- BOTTOM Goal Area -->
+        <div style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; height: 90px;">
+          <!-- Penalty Area -->
+          <div style="position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); width: 70%; height: 110px; border: 3px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 20px 20px 0 0;"></div>
+          
+          <!-- Penalty Spot -->
+          <div style="position: absolute; bottom: 200px; left: 50%; transform: translate(-50%, 50%); width: 12px; height: 12px; background: white; border-radius: 50%; border: 2px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+          
+          <!-- D-arc -->
+          <div style="position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; border: 3px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 100px 100px 0 0;"></div>
+        </div>
         
-        return `
-          <div style="position: absolute; left: ${playerX}px; top: ${playerY}px; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
-            <!-- Jersey -->
-            <div style="position: relative; margin-bottom: 8px;">
-              <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid rgba(255,255,255,0.5);">
-                <div style="flex: 1; background: ${p.colors[0]};"></div>
-                <div style="flex: 1; background: ${p.colors[1]};"></div>
+        <!-- Players -->
+        ${players.map(p => {
+          const shouldShowName = p.showName !== undefined ? p.showName : globalShowNames;
+          const shouldShowClub = p.showClub !== undefined ? p.showClub : globalShowClubs;
+          
+          const playerX = (p.x / 100) * width;
+          const playerY = (p.y / 100) * height;
+          
+          return `
+            <div style="position: absolute; left: ${playerX}px; top: ${playerY}px; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
+              <!-- Jersey -->
+              <div style="position: relative; margin-bottom: 8px;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid rgba(255,255,255,0.5); background: ${p.color};">
+                </div>
+                <!-- Position -->
+                <div style="position: absolute; bottom: -8px; right: -8px; width: 24px; height: 24px; background: rgba(255,255,255,0.95); color: black; font-size: 11px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
+                  ${p.position}
+                </div>
+                <!-- Captain/Vice Badge -->
+                ${p.role ? `
+                  <div style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 6px 12px rgba(0,0,0,0.2); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
+                    <span style="color: white; font-size: 12px; font-weight: 900;">${p.role}</span>
+                  </div>
+                ` : ''}
               </div>
-              <!-- Position -->
-              <div style="position: absolute; bottom: -8px; right: -8px; width: 24px; height: 24px; background: rgba(255,255,255,0.95); color: black; font-size: 11px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
-                ${p.position}
-              </div>
-              <!-- Captain/Vice Badge -->
-              ${p.role ? `
-                <div style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 6px 12px rgba(0,0,0,0.2); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
-                  <span style="color: white; font-size: 12px; font-weight: 900;">${p.role}</span>
+              
+              <!-- Name -->
+              ${shouldShowName ? `
+                <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <span style="color: black; font-size: 14px; font-weight: 900; white-space: nowrap; letter-spacing: -0.2px;">${p.name}</span>
+                </div>
+              ` : ''}
+              
+              <!-- Club -->
+              ${shouldShowClub ? `
+                <div style="background: white; padding: 6px 15px; border-radius: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); border: 2px solid #e5e7eb;">
+                  <span style="color: #4b5563; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;">${p.club}</span>
                 </div>
               ` : ''}
             </div>
-            
-            <!-- Name -->
-            ${shouldShowName ? `
-              <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <span style="color: black; font-size: 14px; font-weight: 900; white-space: nowrap; letter-spacing: -0.2px;">${p.name}</span>
-              </div>
-            ` : ''}
-            
-            <!-- Club -->
-            ${shouldShowClub ? `
-              <div style="background: white; padding: 6px 15px; border-radius: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); border: 2px solid #e5e7eb;">
-                <span style="color: #4b5563; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;">${p.club}</span>
-              </div>
-            ` : ''}
+          `;
+        }).join('')}
+        
+        <!-- Team Name Overlay (Top Center) -->
+        <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;">
+          <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.4);">
+            <h2 style="color: #111827; font-size: 24px; font-weight: 900; margin: 0 0 4px 0; text-align: center; white-space: nowrap;">
+              ${sanitizedTeamName}
+            </h2>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg width="16" height="16" fill="#6b7280" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              <span style="color: #6b7280; font-size: 16px; font-weight: 600;">${sanitizedManagerName}</span>
+            </div>
           </div>
-        `;
-      }).join('')}
-      
-      <!-- Team Name Overlay (Top Center) -->
-      <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;">
-        <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 12px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.4);">
-          <h2 style="color: #111827; font-size: 24px; font-weight: 900; margin: 0 0 4px 0; text-align: center; white-space: nowrap;">
-            ${sanitizedTeamName}
-          </h2>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <svg width="16" height="16" fill="#6b7280" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </div>
+        
+        <!-- Formation Overlay (Top Right) -->
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 5;">
+          <div style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 10px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2);">
+            <div style="color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 700; margin-bottom: 2px; letter-spacing: 0.5px;">FORMATION</div>
+            <div style="color: white; font-size: 20px; font-weight: 900;">${selectedFormation}</div>
+          </div>
+        </div>
+        
+        <!-- Position Labels (Bottom Center) -->
+        <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; color: rgba(255,255,255,0.95); font-size: 16px; font-weight: 900; backdrop-filter: blur(4px); background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.3); z-index: 5; letter-spacing: 1px;">
+          <span>DEF</span>
+          <span>MID</span>
+          <span>ATT</span>
+        </div>
+        
+        <!-- Watermark (Bottom Right) -->
+        <div style="position: absolute; bottom: 20px; right: 20px; z-index: 5;">
+          <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            <svg width="14" height="14" fill="#4b5563" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
-            <span style="color: #6b7280; font-size: 16px; font-weight: 600;">${sanitizedManagerName}</span>
+            <span style="color: #4b5563; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
           </div>
         </div>
-      </div>
-      
-      <!-- Formation Overlay (Top Right) -->
-      <div style="position: absolute; top: 20px; right: 20px; z-index: 5;">
-        <div style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 10px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2);">
-          <div style="color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 700; margin-bottom: 2px; letter-spacing: 0.5px;">FORMATION</div>
-          <div style="color: white; font-size: 20px; font-weight: 900;">${selectedFormation}</div>
+        
+        <!-- Display Settings Indicator (Top Left) -->
+        <div style="position: absolute; top: 20px; left: 20px; z-index: 5; display: flex; flex-direction: column; gap: 6px;">
+          ${globalShowNames ? `
+            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+              <span style="color: #111827; font-size: 11px; font-weight: 700;">Names ON</span>
+            </div>
+          ` : ''}
+          ${globalShowClubs ? `
+            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+              <span style="color: #111827; font-size: 11px; font-weight: 700;">Clubs ON</span>
+            </div>
+          ` : ''}
         </div>
       </div>
-      
-      <!-- Position Labels (Bottom Center) -->
-      <div style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 50px; color: rgba(255,255,255,0.95); font-size: 16px; font-weight: 900; backdrop-filter: blur(4px); background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.3); z-index: 5; letter-spacing: 1px;">
-        <span>DEF</span>
-        <span>MID</span>
-        <span>ATT</span>
-      </div>
-      
-      <!-- Watermark (Bottom Right) -->
-      <div style="position: absolute; bottom: 20px; right: 20px; z-index: 5;">
-        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-          <svg width="14" height="14" fill="#4b5563" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
-          <span style="color: #4b5563; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
-        </div>
-      </div>
-      
-      <!-- Display Settings Indicator (Top Left) -->
-      <div style="position: absolute; top: 20px; left: 20px; z-index: 5; display: flex; flex-direction: column; gap: 6px;">
-        ${globalShowNames ? `
-          <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
-            <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
-            <span style="color: #111827; font-size: 11px; font-weight: 700;">Names ON</span>
-          </div>
-        ` : ''}
-        ${globalShowClubs ? `
-          <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
-            <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
-            <span style="color: #111827; font-size: 11px; font-weight: 700;">Clubs ON</span>
-          </div>
-        ` : ''}
-      </div>
-    </div>
-  `;
-  
-  return container;
-};
+    `;
+    
+    return container;
+  };
 
-// Improved download function using html-to-image
-const downloadPitchImage = async (format: 'png' | 'jpeg' = 'png') => {
-  if (isDownloading) return;
-  
-  setIsDownloading(true);
-  
-  try {
-    // Create a temporary container for the download
-    const container = createDownloadElement();
-    document.body.appendChild(container);
+  // Download function
+  const downloadPitchImage = async (format: 'png' | 'jpeg' = 'png') => {
+    if (isDownloading) return;
     
-    // Convert to image based on format
-    let dataUrl: string;
+    setIsDownloading(true);
     
-    if (format === 'png') {
-      dataUrl = await toPng(container, {
-        quality: 1.0,
-        backgroundColor: 'transparent',
-        pixelRatio: 3, // High DPI for mobile
-        skipFonts: true,
-        cacheBust: true,
-        width: container.offsetWidth,
-        height: container.offsetHeight,
-      });
-    } else {
-      dataUrl = await toJpeg(container, {
-        quality: 0.95,
-        backgroundColor: '#ffffff',
-        pixelRatio: 3,
-        skipFonts: true,
-        cacheBust: true,
-        width: container.offsetWidth,
-        height: container.offsetHeight,
-      });
-    }
-    
-    // Remove the temporary container
-    document.body.removeChild(container);
-    
-    // Create filename
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
-    const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
-    
-    // Different download methods for mobile vs desktop
-    if (isMobile) {
-      // For mobile browsers, we'll try multiple methods
-      await downloadForMobile(dataUrl, filename, format);
-    } else {
-      // Standard download for desktop
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = dataUrl;
-      link.click();
-    }
-    
-    // Show success message
-    alert(`${teamName} lineup downloaded successfully!`);
-    
-  } catch (error) {
-    console.error('Error downloading pitch:', error);
-    
-    // Fallback method using blob
     try {
       const container = createDownloadElement();
       document.body.appendChild(container);
       
-      const blob = await toBlob(container, {
-        quality: 0.95,
-        backgroundColor: format === 'jpeg' ? '#ffffff' : 'transparent',
-        pixelRatio: 2,
-        width: container.offsetWidth,
-        height: container.offsetHeight,
-      });
+      let dataUrl: string;
+      
+      if (format === 'png') {
+        dataUrl = await toPng(container, {
+          quality: 1.0,
+          backgroundColor: 'transparent',
+          pixelRatio: 3,
+          skipFonts: true,
+          cacheBust: true,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+        });
+      } else {
+        dataUrl = await toJpeg(container, {
+          quality: 0.95,
+          backgroundColor: '#ffffff',
+          pixelRatio: 3,
+          skipFonts: true,
+          cacheBust: true,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+        });
+      }
       
       document.body.removeChild(container);
       
-      if (blob) {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
-        const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
-        
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
+      const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
+      
+      if (isMobile) {
+        await downloadForMobile(dataUrl, filename, format);
+      } else {
         const link = document.createElement('a');
         link.download = filename;
-        link.href = URL.createObjectURL(blob);
+        link.href = dataUrl;
         link.click();
-        URL.revokeObjectURL(link.href);
       }
-    } catch (fallbackError) {
-      console.error('Fallback download also failed:', fallbackError);
-      alert('Failed to download lineup. Please try again or use the share option.');
-    }
-  } finally {
-    setIsDownloading(false);
-    setShowDownloadOptions(false);
-  }
-};
-
-// Special handling for mobile downloads
-const downloadForMobile = async (dataUrl: string, filename: string, format: string) => {
-  // Method 1: Try standard download first
-  try {
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = dataUrl;
-    
-    // Trigger click on iOS
-    const clickEvent = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-    });
-    link.dispatchEvent(clickEvent);
-    
-    // For iOS Safari, we need to add to DOM and click
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    return;
-  } catch (error) {
-    console.log('Standard download failed on mobile, trying alternative...');
-  }
-  
-  // Method 2: Open in new tab for browsers that support it
-  try {
-    const newWindow = window.open();
-    if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${filename}</title>
-          <style>
-            body { 
-              margin: 0; 
-              padding: 20px; 
-              background: #f3f4f6; 
-              display: flex; 
-              flex-direction: column; 
-              align-items: center; 
-              justify-content: center; 
-              min-height: 100vh;
-              font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            }
-            .container { 
-              max-width: 100%; 
-              text-align: center; 
-            }
-            img { 
-              max-width: 100%; 
-              height: auto; 
-              border-radius: 12px; 
-              box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-              margin-bottom: 20px;
-            }
-            .instructions { 
-              background: white; 
-              padding: 20px; 
-              border-radius: 12px; 
-              margin: 20px 0; 
-              box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-              max-width: 400px;
-            }
-            h1 { 
-              color: #111827; 
-              font-size: 20px; 
-              margin-bottom: 15px;
-            }
-            p { 
-              color: #4b5563; 
-              line-height: 1.6; 
-              font-size: 14px;
-              margin-bottom: 15px;
-            }
-            .step { 
-              display: flex; 
-              align-items: flex-start; 
-              gap: 12px; 
-              margin: 15px 0; 
-              text-align: left; 
-            }
-            .step-number { 
-              width: 28px; 
-              height: 28px; 
-              background: #3b82f6; 
-              color: white; 
-              border-radius: 50%; 
-              display: flex; 
-              align-items: center; 
-              justify-content: center; 
-              font-weight: bold; 
-              font-size: 14px;
-              flex-shrink: 0;
-            }
-            .button {
-              background: linear-gradient(to right, #3b82f6, #1d4ed8);
-              color: white;
-              border: none;
-              padding: 12px 24px;
-              border-radius: 8px;
-              font-weight: 600;
-              font-size: 16px;
-              cursor: pointer;
-              margin-top: 10px;
-              display: inline-block;
-              text-decoration: none;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>Your Lineup Image</h1>
-            <img src="${dataUrl}" alt="${teamName} Lineup" />
-            <div class="instructions">
-              <p><strong>To save this image:</strong></p>
-              <div class="step">
-                <div class="step-number">1</div>
-                <div>Long press (touch and hold) the image above</div>
-              </div>
-              <div class="step">
-                <div class="step-number">2</div>
-                <div>Select "Save Image" or "Download Image" from the menu</div>
-              </div>
-              <div class="step">
-                <div class="step-number">3</div>
-                <div>Choose where to save it on your device</div>
-              </div>
-              <p style="color: #6b7280; font-size: 13px; margin-top: 20px;">
-                The image is in 3:4 portrait format, perfect for sharing!
-              </p>
-            </div>
-            <a href="${dataUrl}" download="${filename}" class="button">
-              Try Direct Download
-            </a>
-          </div>
-        </body>
-        </html>
-      `);
-      newWindow.document.close();
-      return;
-    }
-  } catch (error) {
-    console.log('New window method failed');
-  }
-  
-  // Method 3: Use share API if available (iOS/Android)
-  if (navigator.share && navigator.canShare) {
-    try {
-      // Convert dataUrl to blob
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
       
-      const file = new File([blob], filename, { type: format === 'png' ? 'image/png' : 'image/jpeg' });
+      alert(`${teamName} lineup downloaded successfully!`);
       
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `${teamName} Lineup`,
-          text: `Check out my ${teamName} lineup created with DraftMaster FC!`,
+    } catch (error) {
+      console.error('Error downloading pitch:', error);
+      
+      try {
+        const container = createDownloadElement();
+        document.body.appendChild(container);
+        
+        const blob = await toBlob(container, {
+          quality: 0.95,
+          backgroundColor: format === 'jpeg' ? '#ffffff' : 'transparent',
+          pixelRatio: 2,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
         });
+        
+        document.body.removeChild(container);
+        
+        if (blob) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const sanitizedTeamName = teamName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'my-team';
+          const filename = `${sanitizedTeamName}-lineup-${timestamp}.${format}`;
+          
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          URL.revokeObjectURL(link.href);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback download also failed:', fallbackError);
+        alert('Failed to download lineup. Please try again or use the share option.');
+      }
+    } finally {
+      setIsDownloading(false);
+      setShowDownloadOptions(false);
+    }
+  };
+
+  const downloadForMobile = async (dataUrl: string, filename: string, format: string) => {
+    try {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      
+      const clickEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      link.dispatchEvent(clickEvent);
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      return;
+    } catch (error) {
+      console.log('Standard download failed on mobile, trying alternative...');
+    }
+    
+    try {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${filename}</title>
+            <style>
+              body { 
+                margin: 0; 
+                padding: 20px; 
+                background: #f3f4f6; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                min-height: 100vh;
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+              }
+              .container { 
+                max-width: 100%; 
+                text-align: center; 
+              }
+              img { 
+                max-width: 100%; 
+                height: auto; 
+                border-radius: 12px; 
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+                margin-bottom: 20px;
+              }
+              .instructions { 
+                background: white; 
+                padding: 20px; 
+                border-radius: 12px; 
+                margin: 20px 0; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+                max-width: 400px;
+              }
+              h1 { 
+                color: #111827; 
+                font-size: 20px; 
+                margin-bottom: 15px;
+              }
+              p { 
+                color: #4b5563; 
+                line-height: 1.6; 
+                font-size: 14px;
+                margin-bottom: 15px;
+              }
+              .step { 
+                display: flex; 
+                align-items: flex-start; 
+                gap: 12px; 
+                margin: 15px 0; 
+                text-align: left; 
+              }
+              .step-number { 
+                width: 28px; 
+                height: 28px; 
+                background: #3b82f6; 
+                color: white; 
+                border-radius: 50%; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-weight: bold; 
+                font-size: 14px;
+                flex-shrink: 0;
+              }
+              .button {
+                background: linear-gradient(to right, #3b82f6, #1d4ed8);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                cursor: pointer;
+                margin-top: 10px;
+                display: inline-block;
+                text-decoration: none;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Your Lineup Image</h1>
+              <img src="${dataUrl}" alt="${teamName} Lineup" />
+              <div class="instructions">
+                <p><strong>To save this image:</strong></p>
+                <div class="step">
+                  <div class="step-number">1</div>
+                  <div>Long press (touch and hold) the image above</div>
+                </div>
+                <div class="step">
+                  <div class="step-number">2</div>
+                  <div>Select "Save Image" or "Download Image" from the menu</div>
+                </div>
+                <div class="step">
+                  <div class="step-number">3</div>
+                  <div>Choose where to save it on your device</div>
+                </div>
+                <p style="color: #6b7280; font-size: 13px; margin-top: 20px;">
+                  The image is in 3:4 portrait format, perfect for sharing!
+                </p>
+              </div>
+              <a href="${dataUrl}" download="${filename}" class="button">
+                Try Direct Download
+              </a>
+            </div>
+          </body>
+          </html>
+        `);
+        newWindow.document.close();
         return;
       }
-    } catch (shareError) {
-      console.log('Share API not available or failed:', shareError);
+    } catch (error) {
+      console.log('New window method failed');
     }
-  }
-  
-  // Method 4: Last resort - show alert with instructions
-  alert(`To save your lineup:\n1. We opened the image in a new tab\n2. If not, long press the image above\n3. Select "Save Image"\n\nImage saved as: ${filename}`);
-};
+    
+    if (navigator.share && navigator.canShare) {
+      try {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        
+        const file = new File([blob], filename, { type: format === 'png' ? 'image/png' : 'image/jpeg' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `${teamName} Lineup`,
+            text: `Check out my ${teamName} lineup created with DraftMaster FC!`,
+          });
+          return;
+        }
+      } catch (shareError) {
+        console.log('Share API not available or failed:', shareError);
+      }
+    }
+    
+    alert(`To save your lineup:\n1. We opened the image in a new tab\n2. If not, long press the image above\n3. Select "Save Image"\n\nImage saved as: ${filename}`);
+  };
 
-  // Share functionality for social media
   const shareLineup = async () => {
     if (navigator.share) {
       try {
-        // Create a smaller version for sharing
         const container = createDownloadElement();
         document.body.appendChild(container);
         
@@ -727,7 +809,6 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
             text: `Check out my ${teamName} lineup created with DraftMaster FC! #DraftMasterFC`,
           });
         } else {
-          // Fallback to copying link
           await navigator.share({
             title: `${teamName} Lineup`,
             text: `Check out my ${teamName} lineup created with DraftMaster FC! #DraftMasterFC`,
@@ -739,7 +820,6 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
         alert('Share failed. Please try downloading and sharing manually.');
       }
     } else {
-      // Fallback for desktop
       alert('Share feature is available on mobile devices. Please use the download option.');
     }
   };
@@ -765,23 +845,32 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
         }}
       >
         <div className="relative mb-0.5 md:mb-1">
-          {/* Jersey Circle */}
-          <div className="relative w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 rounded-full overflow-hidden flex shadow-lg md:shadow-xl border-2 border-white/30 group-hover:scale-110 transition-transform duration-200">
-            <div style={{ backgroundColor: p.colors[0] }} className="flex-1"></div>
-            <div style={{ backgroundColor: p.colors[1] }} className="flex-1"></div>
-            
+          {/* Jersey Circle - Single color now */}
+          <div 
+            className="relative w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 rounded-full overflow-hidden flex shadow-lg md:shadow-xl border-2 border-white/30 group-hover:scale-110 transition-transform duration-200"
+            style={{ backgroundColor: p.color }}
+          >
             {/* Position Badge */}
             <div className="absolute -bottom-1.5 -right-1.5 md:-bottom-2 md:-right-2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 bg-white/95 text-black text-[7px] md:text-[8px] lg:text-[9px] font-black rounded-full flex items-center justify-center border border-zinc-300 shadow-sm md:shadow-md">
               {p.position}
             </div>
+
+            {/* Captain/Vice Badge */}
+            {p.role && (
+              <div className={`absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center border-2 md:border-3 border-white shadow-md md:shadow-lg
+                ${p.role === 'C' ? 'bg-gradient-to-br from-yellow-400 to-yellow-500' : 'bg-gradient-to-br from-blue-500 to-blue-600'}`}>
+                <span className="text-white text-xs md:text-sm font-black drop-shadow-sm">{p.role}</span>
+              </div>
+            )}
           </div>
 
-          {/* Captain/Vice Badge */}
-          {p.role && (
-            <div className={`absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center border-2 md:border-3 border-white shadow-md md:shadow-lg
-              ${p.role === 'C' ? 'bg-gradient-to-br from-yellow-400 to-yellow-500' : 'bg-gradient-to-br from-blue-500 to-blue-600'}`}>
-              <span className="text-white text-xs md:text-sm font-black drop-shadow-sm">{p.role}</span>
-            </div>
+          {/* Color Picker */}
+          {colorPickerOpen === p.id && (
+            <ColorPicker 
+              playerId={p.id} 
+              currentColor={p.color} 
+              onClose={() => setColorPickerOpen(null)}
+            />
           )}
         </div>
 
@@ -872,19 +961,31 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
               <Type className="w-3 h-3 md:w-4 md:h-4" />
             </button>
             <button 
-              onClick={() => {
-                const randomColors: [string, string] = [
-                  `#${Math.floor(Math.random()*16777215).toString(16)}`,
-                  `#${Math.floor(Math.random()*16777215).toString(16)}`
-                ];
-                customizeJersey(p.id, randomColors);
-              }}
+              onClick={() => setColorPickerOpen(p.id)}
               className="p-1.5 md:p-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-full hover:from-purple-600 hover:to-purple-700 transition-all shadow-md md:shadow-lg hover:shadow-lg md:hover:shadow-xl hover:scale-110"
-              title="Random Jersey"
+              title="Change Jersey Color"
             >
-              <Palette className="w-3 h-3 md:w-4 md:h-4" />
+              <ColorPalette className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+            <button 
+              onClick={() => setRandomColor(p.id)}
+              className="p-1.5 md:p-2 bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-full hover:from-pink-600 hover:to-rose-700 transition-all shadow-md md:shadow-lg hover:shadow-lg md:hover:shadow-xl hover:scale-110"
+              title="Random Color"
+            >
+              <Zap className="w-3 h-3 md:w-4 md:h-4" />
             </button>
           </div>
+        )}
+
+        {/* Mobile Color Picker Button */}
+        {isMobile && (
+          <button 
+            onClick={() => setColorPickerOpen(colorPickerOpen === p.id ? null : p.id)}
+            className="absolute -bottom-8 left-1/2 -translate-x-1/2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110"
+            title="Change Color"
+          >
+            <ColorPalette className="w-3 h-3 text-zinc-600" />
+          </button>
         )}
       </div>
     );
@@ -1171,7 +1272,7 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
             {/* Formation Selector - Mobile optimized */}
             <div className="mb-4 md:mb-6 lg:mb-8 overflow-x-auto">
               <div className="flex gap-2 pb-2 min-w-max">
-               {formations.map(f => (
+                {formations.map(f => (
                   <button
                     key={f.id}
                     onClick={() => applyFormation(f.id)}
@@ -1415,6 +1516,46 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
                     )}
                   </button>
                 </div>
+
+                {/* Quick Color Change Section */}
+                <div className="p-3 md:p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl md:rounded-2xl border border-purple-100">
+                  <h4 className="font-bold text-sm md:text-base text-purple-900 mb-2 md:mb-3">Quick Color Changes</h4>
+                  <div className="grid grid-cols-3 gap-2 md:gap-3">
+                    <button 
+                      onClick={() => {
+                        const newPlayers = [...players];
+                        newPlayers.forEach(p => {
+                          updatePlayerColor(p.id, '#ef4444'); // Red
+                        });
+                      }}
+                      className="p-2 md:p-3 rounded-lg md:rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs md:text-sm font-medium transition-colors"
+                    >
+                      All Red
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const newPlayers = [...players];
+                        newPlayers.forEach(p => {
+                          updatePlayerColor(p.id, '#3b82f6'); // Blue
+                        });
+                      }}
+                      className="p-2 md:p-3 rounded-lg md:rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-medium transition-colors"
+                    >
+                      All Blue
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const newPlayers = [...players];
+                        newPlayers.forEach(p => {
+                          setRandomColor(p.id);
+                        });
+                      }}
+                      className="p-2 md:p-3 rounded-lg md:rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs md:text-sm font-medium transition-colors"
+                    >
+                      Random All
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Current Settings Status */}
@@ -1502,11 +1643,11 @@ const downloadForMobile = async (dataUrl: string, filename: string, format: stri
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1"></div>
-                  <span>Use toggles to show/hide names & clubs</span>
+                  <span>Hover over player (desktop) or tap color button (mobile) to change jersey color</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1"></div>
-                  <span>Tap Download for saving options</span>
+                  <span>Use toggles to show/hide names & clubs</span>
                 </li>
               </ul>
             </div>
