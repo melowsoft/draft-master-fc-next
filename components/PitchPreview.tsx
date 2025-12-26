@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { formations, getFormationById } from '../lib/formations';
-//import type { Formation, Player } from '../utils/types';
+import type { FormationPosition } from '../utils/types';
 import { 
   X, Download, Share2, Palette, Save, Zap, 
   Trophy, Grid3x3, Eye, Type, Building,
@@ -73,7 +73,7 @@ const PitchPreview: React.FC = () => {
   // Display Settings
   const [globalShowNames, setGlobalShowNames] = useState(true);
   const [globalShowClubs, setGlobalShowClubs] = useState(true);
-  const [showTeamInfo, setShowTeamInfo] = useState(true); // NEW: Toggle for team/manager name
+  const [showTeamInfo, setShowTeamInfo] = useState(false); // NEW: Toggle for team/manager name
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   
   // Color Picker State
@@ -115,23 +115,23 @@ const PitchPreview: React.FC = () => {
 
   // Update the applyFormation function:
   const applyFormation = useCallback((formationId: string) => {
-    const formation = getFormationById(formationId);
-    if (!formation) return;
+  const formation = getFormationById(formationId);
+  if (!formation) return;
 
-    const updatedPlayers = [...players];
-    formation.positions.forEach((pos, index) => {
-      if (updatedPlayers[index]) {
-        updatedPlayers[index] = {
-          ...updatedPlayers[index],
-          x: pos.x,
-          y: pos.y,
-          position: pos.position
-        };
-      }
-    });
-    setPlayers(updatedPlayers);
-    setSelectedFormation(formationId);
-  }, [players]);
+  const updatedPlayers = [...players];
+  formation.positions.forEach((pos: FormationPosition, index: number) => {
+    if (updatedPlayers[index]) {
+      updatedPlayers[index] = {
+        ...updatedPlayers[index],
+        x: pos.x,
+        y: pos.y,
+        position: pos.position
+      };
+    }
+  });
+  setPlayers(updatedPlayers);
+  setSelectedFormation(formationId);
+}, [players]);
 
   // Handle player movement
   const handlePointerDown = (id: string, e: React.PointerEvent) => {
@@ -511,28 +511,6 @@ const PitchPreview: React.FC = () => {
             </svg>
             <span style="color: #4b5563; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;">draftmasterfc.com</span>
           </div>
-        </div>
-        
-        <!-- Display Settings Indicator (Top Left) -->
-        <div style="position: absolute; top: 20px; left: 20px; z-index: 5; display: flex; flex-direction: column; gap: 6px;">
-          ${globalShowNames ? `
-            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
-              <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
-              <span style="color: #111827; font-size: 11px; font-weight: 700;">Names ON</span>
-            </div>
-          ` : ''}
-          ${globalShowClubs ? `
-            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
-              <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
-              <span style="color: #111827; font-size: 11px; font-weight: 700;">Clubs ON</span>
-            </div>
-          ` : ''}
-          ${showTeamInfo ? `
-            <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;">
-              <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
-              <span style="color: #111827; font-size: 11px; font-weight: 700;">Team Info ON</span>
-            </div>
-          ` : ''}
         </div>
       </div>
     `;
