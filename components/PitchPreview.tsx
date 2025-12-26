@@ -425,8 +425,8 @@ const PitchPreview: React.FC = () => {
               
               <!-- Name -->
               ${shouldShowName ? `
-                <div style="background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                  <span style="color: black; font-size: 18px; font-weight: 900; white-space: nowrap; letter-spacing: -0.2px;">${p.name}</span>
+                <div style="background: none; padding: 6px 12px; border-radius: 8px; margin-bottom: 6px;">
+                  <span style="color: rgba(255,255,255,0.9); font-size: 18px; font-weight: 500; white-space: nowrap; letter-spacing: -0.2px; text-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.6);">${p.name}</span>
                 </div>
               ` : ''}
               
@@ -821,15 +821,6 @@ const PitchPreview: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Color Picker */}
-          {colorPickerOpen === p.id && (
-            <ColorPicker 
-              playerId={p.id} 
-              currentColor={p.color} 
-              onClose={() => setColorPickerOpen(null)}
-            />
-          )}
         </div>
 
         {/* Name and Club */}
@@ -844,7 +835,7 @@ const PitchPreview: React.FC = () => {
                   onChange={(e) => updatePlayerName(p.id, e.target.value)}
                   onBlur={() => setEditingPlayer(null)}
                   onKeyDown={(e) => e.key === 'Enter' && setEditingPlayer(null)}
-                  className="text-black text-[9px] md:text-[11px] lg:text-[12px] font-black leading-none bg-white/90 backdrop-blur-sm border-2 border-blue-400 rounded px-1.5 py-0.5 md:px-2 md:py-1 text-center min-w-[40px] md:min-w-[60px] focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="text-black text-[9px] md:text-[11px] lg:text-[12px] font-medium leading-none bg-white/90 backdrop-blur-sm border-2 border-blue-400 rounded px-1.5 py-0.5 md:px-2 md:py-1 text-center min-w-[40px] md:min-w-[60px] focus:outline-none focus:ring-2 focus:ring-blue-300"
                   autoFocus
                   maxLength={15}
                 />
@@ -854,7 +845,8 @@ const PitchPreview: React.FC = () => {
               <div className="relative group/name">
                 <span 
                   onClick={() => setEditingPlayer(p.id)}
-                  className="text-black text-[9px] md:text-[11px] lg:text-[12px] font-black leading-none whitespace-nowrap drop-shadow-sm md:drop-shadow-md hover:text-blue-600 cursor-pointer transition-colors bg-white/70 backdrop-blur-sm px-2 py-0.5 md:px-3 md:py-1 rounded"
+                  className="text-white text-[9px] md:text-[11px] lg:text-[12px] font-medium leading-none whitespace-nowrap drop-shadow-sm md:drop-shadow-md hover:text-blue-600 cursor-pointer transition-colors backdrop-blur-sm px-2 py-0.5 md:px-3 md:py-1 rounded"
+                  style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
                   title="Click to edit name"
                 >
                   {p.name}
@@ -919,13 +911,6 @@ const PitchPreview: React.FC = () => {
               <Type className="w-3 h-3 md:w-4 md:h-4" />
             </button>
             <button 
-              onClick={() => setColorPickerOpen(p.id)}
-              className="p-1.5 md:p-2 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-full hover:from-purple-600 hover:to-purple-700 transition-all shadow-md md:shadow-lg hover:shadow-lg md:hover:shadow-xl hover:scale-110"
-              title="Change Jersey Color"
-            >
-              <ColorPalette className="w-3 h-3 md:w-4 md:h-4" />
-            </button>
-            <button 
               onClick={() => setRandomColor(p.id)}
               className="p-1.5 md:p-2 bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-full hover:from-pink-600 hover:to-rose-700 transition-all shadow-md md:shadow-lg hover:shadow-lg md:hover:shadow-xl hover:scale-110"
               title="Random Color"
@@ -933,17 +918,6 @@ const PitchPreview: React.FC = () => {
               <Zap className="w-3 h-3 md:w-4 md:h-4" />
             </button>
           </div>
-        )}
-
-        {/* Mobile Color Picker Button */}
-        {isMobile && (
-          <button 
-            onClick={() => setColorPickerOpen(colorPickerOpen === p.id ? null : p.id)}
-            className="absolute -bottom-8 left-1/2 -translate-x-1/2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110"
-            title="Change Color"
-          >
-            <ColorPalette className="w-3 h-3 text-zinc-600" />
-          </button>
         )}
       </div>
     );
