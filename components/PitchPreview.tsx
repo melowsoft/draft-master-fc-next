@@ -439,10 +439,7 @@ const PitchPreview: React.FC = () => {
               <div style="position: relative; margin-bottom: 8px;">
                 <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid rgba(255,255,255,0.5); background: ${p.color};">
                 </div>
-                <!-- Position -->
-                <div style="position: absolute; bottom: -8px; right: -8px; width: 24px; height: 24px; background: rgba(255,255,255,0.95); color: black; font-size: 11px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
-                  ${p.position}
-                </div>
+               
                 <!-- Captain/Vice Badge -->
                 ${p.role ? `
                   <div style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 6px 12px rgba(0,0,0,0.2); background: ${p.role === 'C' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)'};">
